@@ -1,0 +1,36 @@
+{
+  "name": "elite-gaming-leaderboard",
+  "version": "1.0.0",
+  "description": "High-performance gaming leaderboard system with Red-Black Tree implementation",
+  "main": "start.js",
+  "scripts": {
+    "start": "node start.js",
+    "install-deps": "cd backend && npm install",
+    "dev": "cd backend && npm run dev",
+    "test": "cd backend && npm test",
+    "build": "echo 'No build step required for this application'",
+    "clean": "cd backend && rm -rf node_modules && rm -rf data/*.json"
+  },
+  "keywords": [
+    "gaming",
+    "leaderboard",
+    "red-black-tree",
+    "nodejs",
+    "express",
+    "real-time",
+    "performance"
+  ],
+  "author": "Gaming Platform Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/elite-gaming-leaderboard.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/elite-gaming-leaderboard/issues"
+  },
+  "homepage": "https://github.com/your-username/elite-gaming-leaderboard#readme"
+}

@@ -1,0 +1,11 @@
+{
+  "bhavik": {
+    "username": "Bhavik",
+    "email": "bhavik@123",
+    "joinDate": "2025-10-31T13:49:20.325Z",
+    "preferences": {
+      "theme": "default",
+      "notifications": true
+    }
+  }
+}

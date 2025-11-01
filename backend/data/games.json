@@ -1,0 +1,29 @@
+{
+  "racing": {
+    "name": "Speed Racing",
+    "icon": "fa-car-side",
+    "color": "#f093fb",
+    "description": "Test your racing skills",
+    "scores": []
+  },
+  "puzzle": {
+    "name": "Brain Puzzle",
+    "icon": "fa-puzzle-piece",
+    "color": "#4facfe",
+    "description": "Challenge your mind",
+    "scores": [
+      {
+        "playerID": "Bhavik",
+        "score": 121,
+        "timestamp": 1761919042944
+      }
+    ]
+  },
+  "shooter": {
+    "name": "Target Shooter",
+    "icon": "fa-crosshairs",
+    "color": "#fa709a",
+    "description": "Aim for perfection",
+    "scores": []
+  }
+}
