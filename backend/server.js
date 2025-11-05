@@ -95,25 +95,150 @@ async function initializeServer() {
   // Add default games if none exist
   if (Object.keys(gamesData).length === 0) {
     gamesData = {
+      // Classic Games
       racing: {
         name: "Speed Racing",
         icon: "fa-car-side",
         color: "#f093fb",
-        description: "Test your racing skills",
+        description: "Test your racing skills on the track",
+        category: "Action",
+        difficulty: "Medium",
         scores: []
       },
       puzzle: {
         name: "Brain Puzzle",
         icon: "fa-puzzle-piece",
         color: "#4facfe",
-        description: "Challenge your mind",
+        description: "Challenge your mind with complex puzzles",
+        category: "Puzzle",
+        difficulty: "Hard",
         scores: []
       },
       shooter: {
         name: "Target Shooter",
         icon: "fa-crosshairs",
         color: "#fa709a",
-        description: "Aim for perfection",
+        description: "Aim for perfection in this precision game",
+        category: "Action",
+        difficulty: "Medium",
+        scores: []
+      },
+      
+      // Coding Challenges
+      leetcode: {
+        name: "LeetCode Arena",
+        icon: "fa-code",
+        color: "#00d4ff",
+        description: "Solve algorithmic problems and coding challenges",
+        category: "Programming",
+        difficulty: "Expert",
+        scores: []
+      },
+      algorithms: {
+        name: "Algorithm Master",
+        icon: "fa-project-diagram",
+        color: "#8338ec",
+        description: "Master data structures and algorithms",
+        category: "Programming",
+        difficulty: "Expert",
+        scores: []
+      },
+      debugging: {
+        name: "Debug Detective",
+        icon: "fa-bug",
+        color: "#ff006e",
+        description: "Find and fix bugs in code snippets",
+        category: "Programming",
+        difficulty: "Hard",
+        scores: []
+      },
+      
+      // Knowledge Games
+      trivia: {
+        name: "Tech Trivia",
+        icon: "fa-brain",
+        color: "#06ffa5",
+        description: "Test your technology knowledge",
+        category: "Knowledge",
+        difficulty: "Medium",
+        scores: []
+      },
+      math: {
+        name: "Math Wizard",
+        icon: "fa-calculator",
+        color: "#ffd60a",
+        description: "Solve mathematical problems quickly",
+        category: "Education",
+        difficulty: "Medium",
+        scores: []
+      },
+      geography: {
+        name: "World Explorer",
+        icon: "fa-globe",
+        color: "#003566",
+        description: "Explore countries, capitals, and landmarks",
+        category: "Knowledge",
+        difficulty: "Easy",
+        scores: []
+      },
+      
+      // Strategy Games
+      chess: {
+        name: "Chess Master",
+        icon: "fa-chess",
+        color: "#2d3748",
+        description: "Strategic chess puzzles and endgames",
+        category: "Strategy",
+        difficulty: "Hard",
+        scores: []
+      },
+      memory: {
+        name: "Memory Palace",
+        icon: "fa-memory",
+        color: "#e63946",
+        description: "Test and improve your memory skills",
+        category: "Memory",
+        difficulty: "Medium",
+        scores: []
+      },
+      
+      // Creative Games
+      typing: {
+        name: "Speed Typing",
+        icon: "fa-keyboard",
+        color: "#f77f00",
+        description: "Type as fast and accurately as possible",
+        category: "Skill",
+        difficulty: "Easy",
+        scores: []
+      },
+      design: {
+        name: "UI/UX Challenge",
+        icon: "fa-paint-brush",
+        color: "#7209b7",
+        description: "Create beautiful user interfaces",
+        category: "Design",
+        difficulty: "Medium",
+        scores: []
+      },
+      
+      // Competitive Programming
+      hackathon: {
+        name: "Hackathon Sprint",
+        icon: "fa-laptop-code",
+        color: "#f72585",
+        description: "Build projects under time pressure",
+        category: "Programming",
+        difficulty: "Expert",
+        scores: []
+      },
+      cybersecurity: {
+        name: "Cyber Defense",
+        icon: "fa-shield-alt",
+        color: "#264653",
+        description: "Protect systems from cyber threats",
+        category: "Security",
+        difficulty: "Expert",
         scores: []
       }
     };
@@ -151,7 +276,7 @@ app.get('/api/games', (req, res) => {
 // Create new game
 app.post('/api/games', async (req, res) => {
   try {
-    const { name, description, icon, color } = req.body;
+    const { name, description, icon, color, category, difficulty } = req.body;
     
     if (!name || !icon || !color) {
       return res.status(400).json({ error: 'Missing required fields' });
@@ -168,6 +293,8 @@ app.post('/api/games', async (req, res) => {
       description: description || '',
       icon,
       color,
+      category: category || 'Game',
+      difficulty: difficulty || 'Medium',
       scores: []
     };
     
@@ -184,7 +311,7 @@ app.post('/api/games', async (req, res) => {
 app.put('/api/games/:gameId', async (req, res) => {
   try {
     const { gameId } = req.params;
-    const { name, description, icon, color } = req.body;
+    const { name, description, icon, color, category, difficulty } = req.body;
     
     if (!gamesData[gameId]) {
       return res.status(404).json({ error: 'Game not found' });
@@ -195,7 +322,9 @@ app.put('/api/games/:gameId', async (req, res) => {
       name: name || gamesData[gameId].name,
       description: description !== undefined ? description : gamesData[gameId].description,
       icon: icon || gamesData[gameId].icon,
-      color: color || gamesData[gameId].color
+      color: color || gamesData[gameId].color,
+      category: category || gamesData[gameId].category,
+      difficulty: difficulty || gamesData[gameId].difficulty
     };
     
     await saveGames(gamesData);
@@ -426,6 +555,158 @@ app.get('/api/users/:username', async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ error: 'Failed to get user profile' });
+  }
+});
+
+// Achievements endpoints
+app.get('/api/users/:username/achievements', async (req, res) => {
+  try {
+    const { username } = req.params;
+    const userId = username.toLowerCase();
+    
+    if (!usersData[userId]) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    // Calculate achievements based on user's game history
+    const achievements = {
+      firstScore: { unlocked: false, progress: 0 },
+      speedDemon: { unlocked: false, progress: 0 },
+      codeNinja: { unlocked: false, progress: 0 },
+      perfectionist: { unlocked: false, progress: 0 },
+      socialButterfly: { unlocked: false, progress: 0 },
+      champion: { unlocked: false, progress: 0 }
+    };
+    
+    let gamesPlayed = new Set();
+    let hasSubmittedScore = false;
+    let isChampion = false;
+    
+    // Check user's scores across all games
+    Object.keys(gamesData).forEach(gameId => {
+      const game = gamesData[gameId];
+      const userScores = game.scores.filter(score => score.playerID === username);
+      
+      if (userScores.length > 0) {
+        hasSubmittedScore = true;
+        gamesPlayed.add(gameId);
+        
+        // Check for champion status
+        const leaderboard = leaderboards.get(gameId);
+        const rank = leaderboard.getRank(username);
+        if (rank === 1) {
+          isChampion = true;
+        }
+        
+        // Check speed demon (racing game score > 1000)
+        if (gameId === 'racing') {
+          const maxScore = Math.max(...userScores.map(s => s.score));
+          if (maxScore >= 1000) {
+            achievements.speedDemon.unlocked = true;
+            achievements.speedDemon.progress = maxScore;
+          }
+        }
+        
+        // Check code ninja (leetcode completions)
+        if (gameId === 'leetcode') {
+          achievements.codeNinja.progress = userScores.length;
+          if (userScores.length >= 10) {
+            achievements.codeNinja.unlocked = true;
+          }
+        }
+      }
+    });
+    
+    // Set achievement statuses
+    if (hasSubmittedScore) {
+      achievements.firstScore.unlocked = true;
+      achievements.firstScore.progress = 1;
+    }
+    
+    if (isChampion) {
+      achievements.champion.unlocked = true;
+      achievements.champion.progress = 1;
+    }
+    
+    achievements.socialButterfly.progress = gamesPlayed.size;
+    if (gamesPlayed.size >= 5) {
+      achievements.socialButterfly.unlocked = true;
+    }
+    
+    res.json(achievements);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to get achievements' });
+  }
+});
+
+// Tournaments endpoints
+app.get('/api/tournaments', (req, res) => {
+  try {
+    const tournaments = [
+      {
+        id: 'weekly-coding',
+        title: 'Weekly Coding Challenge',
+        game: 'LeetCode Arena',
+        gameId: 'leetcode',
+        status: 'active',
+        startDate: new Date(Date.now() - 86400000).toISOString(),
+        endDate: new Date(Date.now() + 518400000).toISOString(),
+        participants: 42,
+        prize: '🏆 Champion Badge + 500 points'
+      },
+      {
+        id: 'speed-racing-cup',
+        title: 'Speed Racing Cup',
+        game: 'Speed Racing',
+        gameId: 'racing',
+        status: 'upcoming',
+        startDate: new Date(Date.now() + 86400000).toISOString(),
+        endDate: new Date(Date.now() + 604800000).toISOString(),
+        participants: 0,
+        prize: '🥇 Gold Medal + 1000 points'
+      },
+      {
+        id: 'brain-puzzle-championship',
+        title: 'Brain Puzzle Championship',
+        game: 'Brain Puzzle',
+        gameId: 'puzzle',
+        status: 'completed',
+        startDate: new Date(Date.now() - 1209600000).toISOString(),
+        endDate: new Date(Date.now() - 604800000).toISOString(),
+        participants: 156,
+        prize: '🧩 Puzzle Master Badge'
+      }
+    ];
+    
+    res.json(tournaments);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to get tournaments' });
+  }
+});
+
+// Game statistics endpoint
+app.get('/api/stats', (req, res) => {
+  try {
+    const stats = {
+      totalGames: Object.keys(gamesData).length,
+      totalPlayers: Object.keys(usersData).length,
+      totalScores: 0,
+      categories: {}
+    };
+    
+    Object.values(gamesData).forEach(game => {
+      stats.totalScores += game.scores.length;
+      
+      const category = game.category || 'Other';
+      if (!stats.categories[category]) {
+        stats.categories[category] = 0;
+      }
+      stats.categories[category]++;
+    });
+    
+    res.json(stats);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to get statistics' });
   }
 });
 
