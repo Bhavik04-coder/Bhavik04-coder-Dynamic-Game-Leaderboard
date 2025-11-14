@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Game Training Hub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #2a3d45;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        /* Landing Page Styles */
+        .landing-page {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            padding: 20px;
+        }
+
+        .game-tile {
+            background: #f4ece2;
+            border-radius: 12px;
+            padding: 40px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+            position: relative;
+            overflow: hidden;
+            border-left: 6px solid #d97642;
+        }
+
+        .game-tile::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: #d97642;
+        }
+
+        .game-tile:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 28px rgba(217, 118, 66, 0.3);
+            background: #faf6f0;
+        }
+
+        .game-tile h2 {
+            color: #3d5a5c;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+
+        .game-tile p {
+            color: #5a6d70;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .best-score {
+            background: #d97642;
+            color: #fef8f1;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        /* Game Container Styles */
+        .game-container {
+            display: none;
+            background: #f4ece2;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+            position: relative;
+        }
+
+        .game-container.active {
+            display: block;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .back-btn {
+            background: #5a7b6f;
+            color: #fef8f1;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 8px rgba(90, 123, 111, 0.3);
+        }
+
+        .back-btn:hover {
+            background: #4a6b5f;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 12px rgba(90, 123, 111, 0.4);
+        }
+
+        .score-display {
+            background: #d97642;
+            color: #fef8f1;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.1em;
+            box-shadow: 0 3px 8px rgba(217, 118, 66, 0.3);
+        }
+
+        .game-canvas-container {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            background: #fcf9f4;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 3px solid #d97642;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .stats-panel {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-box {
+            background: #e8dcc8;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #5a7b6f;
+        }
+
+        .stat-label {
+            color: #5a7b6f;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #d97642;
+        }
+
+        .game-controls {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .start-btn, .restart-btn {
+            background: #e89e4f;
+            color: #2a3d45;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 0 10px;
+            box-shadow: 0 4px 10px rgba(232, 158, 79, 0.3);
+        }
+
+        .start-btn:hover, .restart-btn:hover {
+            background: #d88a3c;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(232, 158, 79, 0.4);
+        }
+
+        .start-btn:disabled {
+            background: #b8a89a;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .game-over-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(42, 61, 69, 0.92);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: #fef8f1;
+            font-size: 2em;
+            z-index: 10;
+        }
+
+        .game-over-overlay.active {
+            display: flex;
+        }
+
+        .typing-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            border: 3px solid #5a7b6f;
+            border-radius: 8px;
+            margin-top: 20px;
+            outline: none;
+            font-family: 'Courier New', monospace;
+            background: #fcf9f4;
+            color: #2a3d45;
+        }
+
+        .typing-text {
+            font-size: 1.5em;
+            line-height: 1.8;
+            padding: 20px;
+            background: #fcf9f4;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            font-family: 'Courier New', monospace;
+            color: #2a3d45;
+        }
+
+        .typing-text .correct {
+            color: #5a7b6f;
+            background: rgba(90, 123, 111, 0.15);
+        }
+
+        .typing-text .incorrect {
+            color: #c94d3a;
+            background: rgba(201, 77, 58, 0.15);
+        }
+
+        .typing-text .current {
+            background: #e89e4f;
+            color: #2a3d45;
+        }
+
+        @media (max-width: 768px) {
+            .game-tile {
+                padding: 30px;
+            }
+
+            .game-tile h2 {
+                font-size: 1.5em;
+            }
+
+            .game-canvas-container {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Landing Page -->
+        <div class="landing-page" id="landingPage">
+            <div class="game-tile" onclick="startGame('aim')">
+                <h2>🎯 Aim Trainer</h2>
+                <p>Test your reflexes with escaping buttons! Click targets as they move across the screen. Perfect for improving flick shots and tracking accuracy.</p>
+                <div class="best-score">Best Score: <span id="aimBestScore">0</span></div>
+            </div>
+
+            <div class="game-tile" onclick="startGame('type')">
+                <h2>⌨️ TypeRace</h2>
+                <p>Race against the clock! Type the displayed text as fast and accurately as possible to improve your typing speed and precision.</p>
+                <div class="best-score">Best Score: <span id="typeBestScore">0</span> WPM</div>
+            </div>
+
+            <div class="game-tile" onclick="startGame('cognitive')">
+                <h2>🧠 Cognitive Trainer</h2>
+                <p>Multi-modal challenge! Match colors with mouse actions and shapes with keyboard inputs. Train your brain and reflexes simultaneously.</p>
+                <div class="best-score">Best Score: <span id="cognitiveBestScore">0</span></div>
+            </div>
+        </div>
+
+        <!-- Aim Trainer Game -->
+        <div class="game-container" id="aimGame">
+            <div class="game-header">
+                <button class="back-btn" onclick="backToMenu()">← Back to Menu</button>
+                <div class="score-display">Best: <span id="aimBestScoreGame">0</span></div>
+            </div>
+            <div class="game-canvas-container">
+                <canvas id="aimCanvas"></canvas>
+                <div class="game-over-overlay" id="aimGameOver">
+                    <div>Game Over!</div>
+                    <div style="font-size: 0.6em; margin-top: 20px;">Final Score: <span id="aimFinalScore">0</span></div>
+                </div>
+            </div>
+            <div class="stats-panel">
+                <div class="stat-box">
+                    <div class="stat-label">Score</div>
+                    <div class="stat-value" id="aimScore">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Accuracy</div>
+                    <div class="stat-value" id="aimAccuracy">100%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Reaction Time</div>
+                    <div class="stat-value" id="aimReaction">0ms</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Miss Rate</div>
+                    <div class="stat-value" id="aimMissRate">0%</div>
+                </div>
+            </div>
+            <div class="game-controls">
+                <button class="start-btn" id="aimStartBtn" onclick="startAimGame()">Start Game</button>
+                <button class="restart-btn" onclick="restartAimGame()" style="display:none;" id="aimRestartBtn">Restart</button>
+            </div>
+        </div>
+
+        <!-- TypeRace Game -->
+        <div class="game-container" id="typeGame">
+            <div class="game-header">
+                <button class="back-btn" onclick="backToMenu()">← Back to Menu</button>
+                <div class="score-display">Best: <span id="typeBestScoreGame">0</span> WPM</div>
+            </div>
+            <div class="game-canvas-container" style="height: auto; min-height: 300px; padding: 30px;">
+                <div class="typing-text" id="typingText"></div>
+                <input type="text" class="typing-input" id="typingInput" placeholder="Click Start to begin..." disabled>
+                <div class="game-over-overlay" id="typeGameOver">
+                    <div>Race Complete!</div>
+                    <div style="font-size: 0.6em; margin-top: 20px;">WPM: <span id="typeFinalScore">0</span></div>
+                </div>
+            </div>
+            <div class="stats-panel">
+                <div class="stat-box">
+                    <div class="stat-label">WPM</div>
+                    <div class="stat-value" id="typeWPM">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Accuracy</div>
+                    <div class="stat-value" id="typeAccuracy">100%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Time</div>
+                    <div class="stat-value" id="typeTime">0s</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Characters</div>
+                    <div class="stat-value" id="typeChars">0/0</div>
+                </div>
+            </div>
+            <div class="game-controls">
+                <button class="start-btn" id="typeStartBtn" onclick="startTypeGame()">Start Race</button>
+                <button class="restart-btn" onclick="restartTypeGame()" style="display:none;" id="typeRestartBtn">Restart</button>
+            </div>
+        </div>
+
+        <!-- Cognitive Trainer Game -->
+        <div class="game-container" id="cognitiveGame">
+            <div class="game-header">
+                <button class="back-btn" onclick="backToMenu()">← Back to Menu</button>
+                <div class="score-display">Best: <span id="cognitiveBestScoreGame">0</span></div>
+            </div>
+            <div class="game-canvas-container">
+                <canvas id="cognitiveCanvas"></canvas>
+                <div class="game-over-overlay" id="cognitiveGameOver">
+                    <div>Game Over!</div>
+                    <div style="font-size: 0.6em; margin-top: 20px;">Final Score: <span id="cognitiveFinalScore">0</span></div>
+                </div>
+            </div>
+            <div class="stats-panel">
+                <div class="stat-box">
+                    <div class="stat-label">Score</div>
+                    <div class="stat-value" id="cognitiveScore">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Mouse Accuracy</div>
+                    <div class="stat-value" id="cognitiveMouseAcc">100%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Keyboard Precision</div>
+                    <div class="stat-value" id="cognitiveKeyAcc">100%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Reaction Time</div>
+                    <div class="stat-value" id="cognitiveReaction">0ms</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Combo Streak</div>
+                    <div class="stat-value" id="cognitiveCombo">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Error Rate</div>
+                    <div class="stat-value" id="cognitiveError">0%</div>
+                </div>
+            </div>
+            <div class="game-controls">
+                <button class="start-btn" id="cognitiveStartBtn" onclick="startCognitiveGame()">Start Game</button>
+                <button class="restart-btn" onclick="restartCognitiveGame()" style="display:none;" id="cognitiveRestartBtn">Restart</button>
+                <div style="margin-top: 15px; color: #5a7b6f; font-weight: bold;">
+                    🔵 Click | 🔴 Press 'R' | 🟡 Press 'S' + Drag | 🟢 Hold Click | 🟣 Press 'K' | 🟠 Hold 'D'
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Storage Management
+        const STORAGE_KEYS = {
+            AIM: 'aimTrainerData',
+            TYPE: 'typeRaceData',
+            COGNITIVE: 'cognitiveTrainerData'
+        };
+
+        function loadGameData(key) {
+            const data = localStorage.getItem(key);
+            return data ? JSON.parse(data) : { bestScore: 0, sessions: [] };
+        }
+
+        function saveGameData(key, data) {
+            localStorage.setItem(key, JSON.stringify(data));
+        }
+
+        function updateBestScores() {
+            const aimData = loadGameData(STORAGE_KEYS.AIM);
+            const typeData = loadGameData(STORAGE_KEYS.TYPE);
+            const cognitiveData = loadGameData(STORAGE_KEYS.COGNITIVE);
+
+            document.getElementById('aimBestScore').textContent = aimData.bestScore;
+            document.getElementById('typeBestScore').textContent = typeData.bestScore;
+            document.getElementById('cognitiveBestScore').textContent = cognitiveData.bestScore;
+        }
+
+        // Navigation
+        function startGame(gameType) {
+            document.getElementById('landingPage').style.display = 'none';
+            if (gameType === 'aim') {
+                document.getElementById('aimGame').classList.add('active');
+                const data = loadGameData(STORAGE_KEYS.AIM);
+                document.getElementById('aimBestScoreGame').textContent = data.bestScore;
+                initAimGame();
+            } else if (gameType === 'type') {
+                document.getElementById('typeGame').classList.add('active');
+                const data = loadGameData(STORAGE_KEYS.TYPE);
+                document.getElementById('typeBestScoreGame').textContent = data.bestScore;
+                initTypeGame();
+            } else if (gameType === 'cognitive') {
+                document.getElementById('cognitiveGame').classList.add('active');
+                const data = loadGameData(STORAGE_KEYS.COGNITIVE);
+                document.getElementById('cognitiveBestScoreGame').textContent = data.bestScore;
+                initCognitiveGame();
+            }
+        }
+
+        function backToMenu() {
+            document.querySelectorAll('.game-container').forEach(el => el.classList.remove('active'));
+            document.getElementById('landingPage').style.display = 'grid';
+            updateBestScores();
+            
+            // Stop all games
+            if (aimGameState.running) aimGameState.running = false;
+            if (typeGameState.running) typeGameState.running = false;
+            if (cognitiveGameState.running) cognitiveGameState.running = false;
+        }
+
+        // ==================== AIM TRAINER GAME ====================
+        let aimGameState = {
+            canvas: null,
+            ctx: null,
+            running: false,
+            score: 0,
+            hits: 0,
+            misses: 0,
+            totalClicks: 0,
+            reactionTimes: [],
+            targets: [],
+            lastTargetTime: 0,
+            gameTime: 30000, // 30 seconds
+            startTime: 0
+        };
+
+        function initAimGame() {
+            aimGameState.canvas = document.getElementById('aimCanvas');
+            aimGameState.ctx = aimGameState.canvas.getContext('2d');
+            resizeAimCanvas();
+            window.addEventListener('resize', resizeAimCanvas);
+        }
+
+        function resizeAimCanvas() {
+            const container = aimGameState.canvas.parentElement;
+            aimGameState.canvas.width = container.clientWidth;
+            aimGameState.canvas.height = container.clientHeight;
+        }
+
+        function startAimGame() {
+            aimGameState.running = true;
+            aimGameState.score = 0;
+            aimGameState.hits = 0;
+            aimGameState.misses = 0;
+            aimGameState.totalClicks = 0;
+            aimGameState.reactionTimes = [];
+            aimGameState.targets = [];
+            aimGameState.startTime = Date.now();
+            
+            document.getElementById('aimStartBtn').style.display = 'none';
+            document.getElementById('aimRestartBtn').style.display = 'inline-block';
+            document.getElementById('aimGameOver').classList.remove('active');
+            
+            aimGameState.canvas.addEventListener('click', handleAimClick);
+            aimGameLoop();
+        }
+
+        function handleAimClick(e) {
+            if (!aimGameState.running) return;
+            
+            const rect = aimGameState.canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            aimGameState.totalClicks++;
+            let hitTarget = false;
+            
+            for (let i = aimGameState.targets.length - 1; i >= 0; i--) {
+                const target = aimGameState.targets[i];
+                const dx = x - target.x;
+                const dy = y - target.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < target.radius) {
+                    hitTarget = true;
+                    aimGameState.hits++;
+                    aimGameState.score += 10;
+                    const reactionTime = Date.now() - target.spawnTime;
+                    aimGameState.reactionTimes.push(reactionTime);
+                    aimGameState.targets.splice(i, 1);
+                    break;
+                }
+            }
+            
+            if (!hitTarget) {
+                aimGameState.misses++;
+            }
+            
+            updateAimStats();
+        }
+
+        function aimGameLoop() {
+            if (!aimGameState.running) return;
+            
+            const elapsed = Date.now() - aimGameState.startTime;
+            if (elapsed >= aimGameState.gameTime) {
+                endAimGame();
+                return;
+            }
+            
+            // Clear canvas
+            aimGameState.ctx.clearRect(0, 0, aimGameState.canvas.width, aimGameState.canvas.height);
+            
+            // Spawn new targets
+            if (Date.now() - aimGameState.lastTargetTime > 1000) {
+                spawnAimTarget();
+                aimGameState.lastTargetTime = Date.now();
+            }
+            
+            // Update and draw targets
+            for (let i = aimGameState.targets.length - 1; i >= 0; i--) {
+                const target = aimGameState.targets[i];
+                
+                // Move target
+                target.x += target.vx;
+                target.y += target.vy;
+                
+                // Bounce off walls
+                if (target.x < target.radius || target.x > aimGameState.canvas.width - target.radius) {
+                    target.vx *= -1;
+                }
+                if (target.y < target.radius || target.y > aimGameState.canvas.height - target.radius) {
+                    target.vy *= -1;
+                }
+                
+                // Remove old targets
+                if (Date.now() - target.spawnTime > 3000) {
+                    aimGameState.targets.splice(i, 1);
+                    continue;
+                }
+                
+                // Draw target
+                aimGameState.ctx.beginPath();
+                aimGameState.ctx.arc(target.x, target.y, target.radius, 0, Math.PI * 2);
+                aimGameState.ctx.fillStyle = target.color;
+                aimGameState.ctx.fill();
+                aimGameState.ctx.strokeStyle = '#2a3d45';
+                aimGameState.ctx.lineWidth = 3;
+                aimGameState.ctx.stroke();
+            }
+            
+            // Draw timer
+            const timeLeft = Math.ceil((aimGameState.gameTime - elapsed) / 1000);
+            aimGameState.ctx.fillStyle = '#5a7b6f';
+            aimGameState.ctx.font = 'bold 24px Arial';
+            aimGameState.ctx.fillText(`Time: ${timeLeft}s`, 20, 40);
+            
+            requestAnimationFrame(aimGameLoop);
+        }
+
+        function spawnAimTarget() {
+            const radius = 30;
+            const colors = ['#d97642', '#e89e4f', '#5a7b6f', '#c94d3a', '#7a9b8e'];
+            const target = {
+                x: Math.random() * (aimGameState.canvas.width - radius * 2) + radius,
+                y: Math.random() * (aimGameState.canvas.height - radius * 2) + radius,
+                radius: radius,
+                vx: (Math.random() - 0.5) * 4,
+                vy: (Math.random() - 0.5) * 4,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                spawnTime: Date.now()
+            };
+            aimGameState.targets.push(target);
+        }
+
+        function updateAimStats() {
+            document.getElementById('aimScore').textContent = aimGameState.score;
+            
+            const accuracy = aimGameState.totalClicks > 0 
+                ? ((aimGameState.hits / aimGameState.totalClicks) * 100).toFixed(1) 
+                : 100;
+            document.getElementById('aimAccuracy').textContent = accuracy + '%';
+            
+            const avgReaction = aimGameState.reactionTimes.length > 0
+                ? Math.round(aimGameState.reactionTimes.reduce((a, b) => a + b, 0) / aimGameState.reactionTimes.length)
+                : 0;
+            document.getElementById('aimReaction').textContent = avgReaction + 'ms';
+            
+            const missRate = aimGameState.totalClicks > 0
+                ? ((aimGameState.misses / aimGameState.totalClicks) * 100).toFixed(1)
+                : 0;
+            document.getElementById('aimMissRate').textContent = missRate + '%';
+        }
+
+        function endAimGame() {
+            aimGameState.running = false;
+            aimGameState.canvas.removeEventListener('click', handleAimClick);
+            
+            const accuracy = aimGameState.totalClicks > 0 
+                ? ((aimGameState.hits / aimGameState.totalClicks) * 100).toFixed(1) 
+                : 100;
+            const avgReaction = aimGameState.reactionTimes.length > 0
+                ? Math.round(aimGameState.reactionTimes.reduce((a, b) => a + b, 0) / aimGameState.reactionTimes.length)
+                : 0;
+            const missRate = aimGameState.totalClicks > 0
+                ? ((aimGameState.misses / aimGameState.totalClicks) * 100).toFixed(1)
+                : 0;
+            
+            // Save session data
+            const data = loadGameData(STORAGE_KEYS.AIM);
+            const session = {
+                score: aimGameState.score,
+                accuracy: parseFloat(accuracy),
+                reactionTime: avgReaction,
+                missRate: parseFloat(missRate),
+                timestamp: new Date().toISOString()
+            };
+            data.sessions.push(session);
+            
+            if (aimGameState.score > data.bestScore) {
+                data.bestScore = aimGameState.score;
+                document.getElementById('aimBestScoreGame').textContent = data.bestScore;
+            }
+            
+            saveGameData(STORAGE_KEYS.AIM, data);
+            
+            document.getElementById('aimFinalScore').textContent = aimGameState.score;
+            document.getElementById('aimGameOver').classList.add('active');
+        }
+
+        function restartAimGame() {
+            startAimGame();
+        }
+
+        // ==================== TYPE RACE GAME ====================
+        const typeTexts = [
+            "The quick brown fox jumps over the lazy dog near the riverbank.",
+            "Programming is the art of telling another human what one wants the computer to do.",
+            "Practice makes perfect when it comes to improving typing speed and accuracy.",
+            "Web development combines creativity with logical thinking to build amazing experiences.",
+            "Success is not final failure is not fatal it is the courage to continue that counts."
+        ];
+
+        let typeGameState = {
+            running: false,
+            currentText: '',
+            currentIndex: 0,
+            startTime: 0,
+            errors: 0,
+            intervalId: null
+        };
+
+        function initTypeGame() {
+            document.getElementById('typingInput').addEventListener('input', handleTyping);
+        }
+
+        function startTypeGame() {
+            typeGameState.running = true;
+            typeGameState.currentText = typeTexts[Math.floor(Math.random() * typeTexts.length)];
+            typeGameState.currentIndex = 0;
+            typeGameState.errors = 0;
+            typeGameState.startTime = Date.now();
+            
+            document.getElementById('typeStartBtn').style.display = 'none';
+            document.getElementById('typeRestartBtn').style.display = 'inline-block';
+            document.getElementById('typeGameOver').classList.remove('active');
+            document.getElementById('typingInput').disabled = false;
+            document.getElementById('typingInput').value = '';
+            document.getElementById('typingInput').focus();
+            
+            renderTypeText();
+            
+            typeGameState.intervalId = setInterval(updateTypeStats, 100);
+        }
+
+        function handleTyping(e) {
+            if (!typeGameState.running) return;
+            
+            const input = e.target.value;
+            const expected = typeGameState.currentText.substring(0, input.length);
+            
+            if (input === typeGameState.currentText) {
+                endTypeGame();
+                return;
+            }
+            
+            if (input !== expected) {
+                typeGameState.errors++;
+            }
+            
+            typeGameState.currentIndex = input.length;
+            renderTypeText();
+        }
+
+        function renderTypeText() {
+            const input = document.getElementById('typingInput').value;
+            const text = typeGameState.currentText;
+            let html = '';
+            
+            for (let i = 0; i < text.length; i++) {
+                if (i < input.length) {
+                    if (text[i] === input[i]) {
+                        html += `<span class="correct">${text[i]}</span>`;
+                    } else {
+                        html += `<span class="incorrect">${text[i]}</span>`;
+                    }
+                } else if (i === input.length) {
+                    html += `<span class="current">${text[i]}</span>`;
+                } else {
+                    html += text[i];
+                }
+            }
+            
+            document.getElementById('typingText').innerHTML = html;
+        }
+
+        function updateTypeStats() {
+            if (!typeGameState.running) return;
+            
+            const elapsed = (Date.now() - typeGameState.startTime) / 1000;
+            const input = document.getElementById('typingInput').value;
+            const words = input.trim().split(/\s+/).length;
+            const wpm = Math.round((words / elapsed) * 60);
+            
+            document.getElementById('typeWPM').textContent = wpm;
+            document.getElementById('typeTime').textContent = elapsed.toFixed(1) + 's';
+            document.getElementById('typeChars').textContent = `${input.length}/${typeGameState.currentText.length}`;
+            
+            const accuracy = input.length > 0
+                ? (((input.length - typeGameState.errors) / input.length) * 100).toFixed(1)
+                : 100;
+            document.getElementById('typeAccuracy').textContent = accuracy + '%';
+        }
+
+        function endTypeGame() {
+            typeGameState.running = false;
+            clearInterval(typeGameState.intervalId);
+            
+            const elapsed = (Date.now() - typeGameState.startTime) / 1000;
+            const words = typeGameState.currentText.trim().split(/\s+/).length;
+            const wpm = Math.round((words / elapsed) * 60);
+            const accuracy = (((typeGameState.currentText.length - typeGameState.errors) / typeGameState.currentText.length) * 100).toFixed(1);
+            
+            document.getElementById('typingInput').disabled = true;
+            
+            // Save session data
+            const data = loadGameData(STORAGE_KEYS.TYPE);
+            const session = {
+                wpm: wpm,
+                accuracy: parseFloat(accuracy),
+                time: elapsed,
+                timestamp: new Date().toISOString()
+            };
+            data.sessions.push(session);
+            
+            if (wpm > data.bestScore) {
+                data.bestScore = wpm;
+                document.getElementById('typeBestScoreGame').textContent = data.bestScore;
+            }
+            
+            saveGameData(STORAGE_KEYS.TYPE, data);
+            
+            document.getElementById('typeFinalScore').textContent = wpm;
+            document.getElementById('typeGameOver').classList.add('active');
+        }
+
+        function restartTypeGame() {
+            document.getElementById('typeGameOver').classList.remove('active');
+            startTypeGame();
+        }
+
+        // ==================== COGNITIVE TRAINER GAME ====================
+        const TARGET_TYPES = [
+            { color: '#4a8fb5', shape: 'circle', mouseAction: 'click', keyAction: null, key: null },
+            { color: '#c94d3a', shape: 'triangle', mouseAction: null, keyAction: 'press', key: 'r' },
+            { color: '#e8b04d', shape: 'square', mouseAction: 'drag', keyAction: 'press', key: 's' },
+            { color: '#5a7b6f', shape: 'circle', mouseAction: 'hold', keyAction: null, key: null },
+            { color: '#8b6ba8', shape: 'pentagon', mouseAction: null, keyAction: 'press', key: 'k' },
+            { color: '#d97642', shape: 'hexagon', mouseAction: null, keyAction: 'hold', key: 'd' }
+        ];
+
+        let cognitiveGameState = {
+            canvas: null,
+            ctx: null,
+            running: false,
+            score: 0,
+            mouseCorrect: 0,
+            mouseTotal: 0,
+            keyCorrect: 0,
+            keyTotal: 0,
+            reactionTimes: [],
+            combo: 0,
+            maxCombo: 0,
+            errors: 0,
+            targets: [],
+            lastTargetTime: 0,
+            gameTime: 45000, // 45 seconds
+            startTime: 0,
+            keysPressed: new Set(),
+            mouseDown: false,
+            dragTarget: null
+        };
+
+        function initCognitiveGame() {
+            cognitiveGameState.canvas = document.getElementById('cognitiveCanvas');
+            cognitiveGameState.ctx = cognitiveGameState.canvas.getContext('2d');
+            resizeCognitiveCanvas();
+            window.addEventListener('resize', resizeCognitiveCanvas);
+        }
+
+        function resizeCognitiveCanvas() {
+            const container = cognitiveGameState.canvas.parentElement;
+            cognitiveGameState.canvas.width = container.clientWidth;
+            cognitiveGameState.canvas.height = container.clientHeight;
+        }
+
+        function startCognitiveGame() {
+            cognitiveGameState.running = true;
+            cognitiveGameState.score = 0;
+            cognitiveGameState.mouseCorrect = 0;
+            cognitiveGameState.mouseTotal = 0;
+            cognitiveGameState.keyCorrect = 0;
+            cognitiveGameState.keyTotal = 0;
+            cognitiveGameState.reactionTimes = [];
+            cognitiveGameState.combo = 0;
+            cognitiveGameState.maxCombo = 0;
+            cognitiveGameState.errors = 0;
+            cognitiveGameState.targets = [];
+            cognitiveGameState.startTime = Date.now();
+            cognitiveGameState.keysPressed = new Set();
+            cognitiveGameState.mouseDown = false;
+            cognitiveGameState.dragTarget = null;
+            
+            document.getElementById('cognitiveStartBtn').style.display = 'none';
+            document.getElementById('cognitiveRestartBtn').style.display = 'inline-block';
+            document.getElementById('cognitiveGameOver').classList.remove('active');
+            
+            cognitiveGameState.canvas.addEventListener('mousedown', handleCognitiveMouseDown);
+            cognitiveGameState.canvas.addEventListener('mouseup', handleCognitiveMouseUp);
+            cognitiveGameState.canvas.addEventListener('mousemove', handleCognitiveMouseMove);
+            document.addEventListener('keydown', handleCognitiveKeyDown);
+            document.addEventListener('keyup', handleCognitiveKeyUp);
+            
+            cognitiveGameLoop();
+        }
+
+        function handleCognitiveMouseDown(e) {
+            if (!cognitiveGameState.running) return;
+            cognitiveGameState.mouseDown = true;
+            
+            const rect = cognitiveGameState.canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            checkCognitiveTarget(x, y, 'mousedown');
+        }
+
+        function handleCognitiveMouseUp(e) {
+            if (!cognitiveGameState.running) return;
+            
+            const wasDown = cognitiveGameState.mouseDown;
+            cognitiveGameState.mouseDown = false;
+            cognitiveGameState.dragTarget = null;
+            
+            if (wasDown) {
+                const rect = cognitiveGameState.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                checkCognitiveTarget(x, y, 'mouseup');
+            }
+        }
+
+        function handleCognitiveMouseMove(e) {
+            if (!cognitiveGameState.running || !cognitiveGameState.dragTarget) return;
+            
+            const rect = cognitiveGameState.canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            // Check if dragged far enough
+            const dx = x - cognitiveGameState.dragTarget.startX;
+            const dy = y - cognitiveGameState.dragTarget.startY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance > 50 && !cognitiveGameState.dragTarget.completed) {
+                handleCorrectAction(cognitiveGameState.dragTarget.target);
+                cognitiveGameState.dragTarget.completed = true;
+            }
+        }
+
+        function handleCognitiveKeyDown(e) {
+            if (!cognitiveGameState.running) return;
+            
+            const key = e.key.toLowerCase();
+            if (cognitiveGameState.keysPressed.has(key)) return;
+            
+            cognitiveGameState.keysPressed.add(key);
+            checkCognitiveKeyAction(key, 'keydown');
+        }
+
+        function handleCognitiveKeyUp(e) {
+            if (!cognitiveGameState.running) return;
+            
+            const key = e.key.toLowerCase();
+            cognitiveGameState.keysPressed.delete(key);
+            checkCognitiveKeyAction(key, 'keyup');
+        }
+
+        function checkCognitiveTarget(x, y, action) {
+            for (let i = cognitiveGameState.targets.length - 1; i >= 0; i--) {
+                const target = cognitiveGameState.targets[i];
+                const dx = x - target.x;
+                const dy = y - target.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < target.size) {
+                    const targetType = TARGET_TYPES[target.typeIndex];
+                    
+                    if (targetType.mouseAction === 'click' && action === 'mousedown') {
+                        handleCorrectAction(target);
+                        return;
+                    } else if (targetType.mouseAction === 'hold' && action === 'mouseup') {
+                        if (cognitiveGameState.mouseDown && Date.now() - target.mouseDownTime > 500) {
+                            handleCorrectAction(target);
+                            return;
+                        }
+                    } else if (targetType.mouseAction === 'drag' && action === 'mousedown') {
+                        // Check if correct key is pressed
+                        if (cognitiveGameState.keysPressed.has(targetType.key)) {
+                            cognitiveGameState.dragTarget = {
+                                target: target,
+                                startX: x,
+                                startY: y,
+                                completed: false
+                            };
+                        } else {
+                            handleWrongAction();
+                        }
+                        return;
+                    } else if (targetType.mouseAction && action === 'mousedown') {
+                        if (targetType.mouseAction === 'hold') {
+                            target.mouseDownTime = Date.now();
+                        } else {
+                            handleWrongAction();
+                        }
+                        return;
+                    }
+                }
+            }
+        }
+
+        function checkCognitiveKeyAction(key, action) {
+            for (let i = cognitiveGameState.targets.length - 1; i >= 0; i--) {
+                const target = cognitiveGameState.targets[i];
+                const targetType = TARGET_TYPES[target.typeIndex];
+                
+                if (targetType.keyAction === 'press' && targetType.key === key && action === 'keydown') {
+                    if (targetType.mouseAction === 'drag') {
+                        // Drag targets need both key and drag
+                        continue;
+                    }
+                    handleCorrectAction(target);
+                    return;
+                } else if (targetType.keyAction === 'hold' && targetType.key === key && action === 'keyup') {
+                    if (target.keyDownTime && Date.now() - target.keyDownTime > 500) {
+                        handleCorrectAction(target);
+                        return;
+                    }
+                } else if (targetType.keyAction === 'hold' && targetType.key === key && action === 'keydown') {
+                    target.keyDownTime = Date.now();
+                }
+            }
+        }
+
+        function handleCorrectAction(target) {
+            const targetType = TARGET_TYPES[target.typeIndex];
+            const reactionTime = Date.now() - target.spawnTime;
+            
+            cognitiveGameState.reactionTimes.push(reactionTime);
+            cognitiveGameState.score += 10 + cognitiveGameState.combo;
+            cognitiveGameState.combo++;
+            cognitiveGameState.maxCombo = Math.max(cognitiveGameState.maxCombo, cognitiveGameState.combo);
+            
+            if (targetType.mouseAction) {
+                cognitiveGameState.mouseCorrect++;
+                cognitiveGameState.mouseTotal++;
+            }
+            if (targetType.keyAction) {
+                cognitiveGameState.keyCorrect++;
+                cognitiveGameState.keyTotal++;
+            }
+            
+            // Remove target
+            const index = cognitiveGameState.targets.indexOf(target);
+            if (index > -1) {
+                cognitiveGameState.targets.splice(index, 1);
+            }
+            
+            updateCognitiveStats();
+        }
+
+        function handleWrongAction() {
+            cognitiveGameState.errors++;
+            cognitiveGameState.combo = 0;
+            cognitiveGameState.mouseTotal++;
+            updateCognitiveStats();
+        }
+
+        function cognitiveGameLoop() {
+            if (!cognitiveGameState.running) return;
+            
+            const elapsed = Date.now() - cognitiveGameState.startTime;
+            if (elapsed >= cognitiveGameState.gameTime) {
+                endCognitiveGame();
+                return;
+            }
+            
+            // Clear canvas
+            cognitiveGameState.ctx.clearRect(0, 0, cognitiveGameState.canvas.width, cognitiveGameState.canvas.height);
+            
+            // Spawn new targets
+            if (Date.now() - cognitiveGameState.lastTargetTime > 2000) {
+                spawnCognitiveTarget();
+                cognitiveGameState.lastTargetTime = Date.now();
+            }
+            
+            // Update and draw targets
+            for (let i = cognitiveGameState.targets.length - 1; i >= 0; i--) {
+                const target = cognitiveGameState.targets[i];
+                const lifespan = Date.now() - target.spawnTime;
+                const maxLife = 4000;
+                
+                // Remove expired targets
+                if (lifespan > maxLife) {
+                    cognitiveGameState.targets.splice(i, 1);
+                    cognitiveGameState.combo = 0;
+                    cognitiveGameState.errors++;
+                    continue;
+                }
+                
+                // Draw timer ring
+                const progress = 1 - (lifespan / maxLife);
+                cognitiveGameState.ctx.beginPath();
+                cognitiveGameState.ctx.arc(target.x, target.y, target.size + 10, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * progress));
+                cognitiveGameState.ctx.strokeStyle = '#c94d3a';
+                cognitiveGameState.ctx.lineWidth = 5;
+                cognitiveGameState.ctx.stroke();
+                
+                // Draw shape
+                const targetType = TARGET_TYPES[target.typeIndex];
+                cognitiveGameState.ctx.fillStyle = targetType.color;
+                drawShape(cognitiveGameState.ctx, target.x, target.y, target.size, targetType.shape);
+            }
+            
+            // Draw timer
+            const timeLeft = Math.ceil((cognitiveGameState.gameTime - elapsed) / 1000);
+            cognitiveGameState.ctx.fillStyle = '#5a7b6f';
+            cognitiveGameState.ctx.font = 'bold 24px Arial';
+            cognitiveGameState.ctx.fillText(`Time: ${timeLeft}s`, 20, 40);
+            
+            requestAnimationFrame(cognitiveGameLoop);
+        }
+
+        function spawnCognitiveTarget() {
+            const size = 40;
+            const target = {
+                x: Math.random() * (cognitiveGameState.canvas.width - size * 2) + size,
+                y: Math.random() * (cognitiveGameState.canvas.height - size * 2) + size,
+                size: size,
+                typeIndex: Math.floor(Math.random() * TARGET_TYPES.length),
+                spawnTime: Date.now()
+            };
+            cognitiveGameState.targets.push(target);
+        }
+
+        function drawShape(ctx, x, y, size, shape) {
+            ctx.beginPath();
+            
+            if (shape === 'circle') {
+                ctx.arc(x, y, size, 0, Math.PI * 2);
+            } else if (shape === 'triangle') {
+                ctx.moveTo(x, y - size);
+                ctx.lineTo(x - size, y + size);
+                ctx.lineTo(x + size, y + size);
+                ctx.closePath();
+            } else if (shape === 'square') {
+                ctx.rect(x - size, y - size, size * 2, size * 2);
+            } else if (shape === 'pentagon') {
+                for (let i = 0; i < 5; i++) {
+                    const angle = (Math.PI * 2 / 5) * i - Math.PI / 2;
+                    const px = x + size * Math.cos(angle);
+                    const py = y + size * Math.sin(angle);
+                    if (i === 0) ctx.moveTo(px, py);
+                    else ctx.lineTo(px, py);
+                }
+                ctx.closePath();
+            } else if (shape === 'hexagon') {
+                for (let i = 0; i < 6; i++) {
+                    const angle = (Math.PI * 2 / 6) * i;
+                    const px = x + size * Math.cos(angle);
+                    const py = y + size * Math.sin(angle);
+                    if (i === 0) ctx.moveTo(px, py);
+                    else ctx.lineTo(px, py);
+                }
+                ctx.closePath();
+            }
+            
+            ctx.fill();
+            ctx.strokeStyle = '#2a3d45';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+        }
+
+        function updateCognitiveStats() {
+            document.getElementById('cognitiveScore').textContent = cognitiveGameState.score;
+            
+            const mouseAcc = cognitiveGameState.mouseTotal > 0
+                ? ((cognitiveGameState.mouseCorrect / cognitiveGameState.mouseTotal) * 100).toFixed(1)
+                : 100;
+            document.getElementById('cognitiveMouseAcc').textContent = mouseAcc + '%';
+            
+            const keyAcc = cognitiveGameState.keyTotal > 0
+                ? ((cognitiveGameState.keyCorrect / cognitiveGameState.keyTotal) * 100).toFixed(1)
+                : 100;
+            document.getElementById('cognitiveKeyAcc').textContent = keyAcc + '%';
+            
+            const avgReaction = cognitiveGameState.reactionTimes.length > 0
+                ? Math.round(cognitiveGameState.reactionTimes.reduce((a, b) => a + b, 0) / cognitiveGameState.reactionTimes.length)
+                : 0;
+            document.getElementById('cognitiveReaction').textContent = avgReaction + 'ms';
+            
+            document.getElementById('cognitiveCombo').textContent = cognitiveGameState.combo;
+            
+            const totalActions = cognitiveGameState.mouseTotal + cognitiveGameState.keyTotal;
+            const errorRate = totalActions > 0
+                ? ((cognitiveGameState.errors / totalActions) * 100).toFixed(1)
+                : 0;
+            document.getElementById('cognitiveError').textContent = errorRate + '%';
+        }
+
+        function endCognitiveGame() {
+            cognitiveGameState.running = false;
+            
+            cognitiveGameState.canvas.removeEventListener('mousedown', handleCognitiveMouseDown);
+            cognitiveGameState.canvas.removeEventListener('mouseup', handleCognitiveMouseUp);
+            cognitiveGameState.canvas.removeEventListener('mousemove', handleCognitiveMouseMove);
+            document.removeEventListener('keydown', handleCognitiveKeyDown);
+            document.removeEventListener('keyup', handleCognitiveKeyUp);
+            
+            const mouseAcc = cognitiveGameState.mouseTotal > 0
+                ? ((cognitiveGameState.mouseCorrect / cognitiveGameState.mouseTotal) * 100).toFixed(1)
+                : 100;
+            const keyAcc = cognitiveGameState.keyTotal > 0
+                ? ((cognitiveGameState.keyCorrect / cognitiveGameState.keyTotal) * 100).toFixed(1)
+                : 100;
+            const avgReaction = cognitiveGameState.reactionTimes.length > 0
+                ? Math.round(cognitiveGameState.reactionTimes.reduce((a, b) => a + b, 0) / cognitiveGameState.reactionTimes.length)
+                : 0;
+            const totalActions = cognitiveGameState.mouseTotal + cognitiveGameState.keyTotal;
+            const errorRate = totalActions > 0
+                ? ((cognitiveGameState.errors / totalActions) * 100).toFixed(1)
+                : 0;
+            
+            // Save session data
+            const data = loadGameData(STORAGE_KEYS.COGNITIVE);
+            const session = {
+                score: cognitiveGameState.score,
+                mouseAccuracy: parseFloat(mouseAcc),
+                keyboardPrecision: parseFloat(keyAcc),
+                reactionTime: avgReaction,
+                errorRate: parseFloat(errorRate),
+                maxCombo: cognitiveGameState.maxCombo,
+                timestamp: new Date().toISOString()
+            };
+            data.sessions.push(session);
+            
+            if (cognitiveGameState.score > data.bestScore) {
+                data.bestScore = cognitiveGameState.score;
+                document.getElementById('cognitiveBestScoreGame').textContent = data.bestScore;
+            }
+            
+            saveGameData(STORAGE_KEYS.COGNITIVE, data);
+            
+            document.getElementById('cognitiveFinalScore').textContent = cognitiveGameState.score;
+            document.getElementById('cognitiveGameOver').classList.add('active');
+        }
+
+        function restartCognitiveGame() {
+            startCognitiveGame();
+        }
+
+        // Initialize on page load
+        updateBestScores();
+    </script>
+</body>
+</html>

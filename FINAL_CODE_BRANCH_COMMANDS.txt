@@ -1,0 +1,59 @@
+═══════════════════════════════════════════════════════════════
+    🌿 PUSH TO Final_code BRANCH - COPY THESE COMMANDS
+═══════════════════════════════════════════════════════════════
+
+STEP 1: OPEN TERMINAL IN YOUR PROJECT FOLDER
+─────────────────────────────────────────────
+
+STEP 2: COPY AND PASTE THESE COMMANDS ONE BY ONE
+─────────────────────────────────────────────────
+
+git init
+
+git add .
+
+git commit -m "Final code: Dynamic Gaming Leaderboard with RBT"
+
+git checkout -b Final_code
+
+git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
+
+git push -u origin Final_code
+
+⚠️ IMPORTANT: Replace YOUR_USERNAME and YOUR_REPO with your actual values!
+
+═══════════════════════════════════════════════════════════════
+
+EXAMPLE:
+If your GitHub username is "john123" and repo is "gaming-project":
+
+git remote add origin https://github.com/john123/gaming-project.git
+
+═══════════════════════════════════════════════════════════════
+
+✅ AFTER PUSHING:
+
+1. Go to: https://github.com/YOUR_USERNAME/YOUR_REPO
+2. Click branch dropdown (shows "main")
+3. Select "Final_code" to view your branch
+4. Your code is now on the Final_code branch!
+
+═══════════════════════════════════════════════════════════════
+
+🔄 IF YOU ALREADY HAVE A REPO:
+
+git add .
+git commit -m "Final code: Complete implementation"
+git checkout -b Final_code
+git push -u origin Final_code
+
+═══════════════════════════════════════════════════════════════
+
+📝 TO UPDATE Final_code BRANCH LATER:
+
+git checkout Final_code
+git add .
+git commit -m "Your update message"
+git push
+
+═══════════════════════════════════════════════════════════════

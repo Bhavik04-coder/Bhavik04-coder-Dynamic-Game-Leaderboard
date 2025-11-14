@@ -7,20 +7,16 @@ const RBTree = require('./rbtree.js');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../frontend')));
 
-// Data storage
 const DATA_DIR = path.join(__dirname, 'data');
 const GAMES_FILE = path.join(DATA_DIR, 'games.json');
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
 
-// In-memory leaderboards for each game
 const leaderboards = new Map();
 
-// Initialize data directory
 async function initializeDataDir() {
   try {
     await fs.mkdir(DATA_DIR, { recursive: true });
@@ -29,14 +25,11 @@ async function initializeDataDir() {
   }
 }
 
-// Load data from files
 async function loadData() {
   try {
-    // Load games
     const gamesData = await fs.readFile(GAMES_FILE, 'utf8');
     const games = JSON.parse(gamesData);
     
-    // Initialize leaderboards for each game
     Object.keys(games).forEach(gameId => {
       const leaderboard = new RBTree();
       if (games[gameId].scores) {
@@ -54,7 +47,6 @@ async function loadData() {
   }
 }
 
-// Save games data
 async function saveGames(games) {
   try {
     await fs.writeFile(GAMES_FILE, JSON.stringify(games, null, 2));
@@ -63,7 +55,6 @@ async function saveGames(games) {
   }
 }
 
-// Save users data
 async function saveUsers(users) {
   try {
     await fs.writeFile(USERS_FILE, JSON.stringify(users, null, 2));
@@ -72,7 +63,6 @@ async function saveUsers(users) {
   }
 }
 
-// Load users data
 async function loadUsers() {
   try {
     const usersData = await fs.readFile(USERS_FILE, 'utf8');
@@ -82,7 +72,6 @@ async function loadUsers() {
   }
 }
 
-// Initialize server
 let gamesData = {};
 let usersData = {};
 
@@ -92,124 +81,33 @@ async function initializeServer() {
   gamesData = data.games;
   usersData = await loadUsers();
   
-  // Add default games if none exist
   if (Object.keys(gamesData).length === 0) {
     gamesData = {
-      // Classic Games
-      racing: {
-        name: "Speed Racing",
-        icon: "fa-car-side",
+      aim: {
+        name: "🎯 Aim Trainer",
+        icon: "fa-bullseye",
         color: "#f093fb",
-        description: "Test your racing skills on the track",
+        description: "Test your reflexes with escaping buttons! Click targets as they move across the screen.",
         category: "Action",
         difficulty: "Medium",
         scores: []
       },
-      puzzle: {
-        name: "Brain Puzzle",
-        icon: "fa-puzzle-piece",
-        color: "#4facfe",
-        description: "Challenge your mind with complex puzzles",
-        category: "Puzzle",
-        difficulty: "Hard",
-        scores: []
-      },
-      shooter: {
-        name: "Target Shooter",
-        icon: "fa-crosshairs",
-        color: "#fa709a",
-        description: "Aim for perfection in this precision game",
-        category: "Action",
-        difficulty: "Medium",
-        scores: []
-      },
-      
-      // Coding Challenges
-      leetcode: {
-        name: "LeetCode Arena",
-        icon: "fa-code",
-        color: "#00d4ff",
-        description: "Solve algorithmic problems and coding challenges",
-        category: "Programming",
-        difficulty: "Expert",
-        scores: []
-      },
-      algorithms: {
-        name: "Algorithm Master",
-        icon: "fa-project-diagram",
-        color: "#8338ec",
-        description: "Master data structures and algorithms",
-        category: "Programming",
-        difficulty: "Expert",
-        scores: []
-      },
-      debugging: {
-        name: "Debug Detective",
-        icon: "fa-bug",
-        color: "#ff006e",
-        description: "Find and fix bugs in code snippets",
-        category: "Programming",
-        difficulty: "Hard",
-        scores: []
-      },
-      
-      // Knowledge Games
-      trivia: {
-        name: "Tech Trivia",
-        icon: "fa-brain",
-        color: "#06ffa5",
-        description: "Test your technology knowledge",
-        category: "Knowledge",
-        difficulty: "Medium",
-        scores: []
-      },
-      math: {
-        name: "Math Wizard",
-        icon: "fa-calculator",
-        color: "#ffd60a",
-        description: "Solve mathematical problems quickly",
-        category: "Education",
-        difficulty: "Medium",
-        scores: []
-      },
-      geography: {
-        name: "World Explorer",
-        icon: "fa-globe",
-        color: "#003566",
-        description: "Explore countries, capitals, and landmarks",
-        category: "Knowledge",
-        difficulty: "Easy",
-        scores: []
-      },
-      
-      // Strategy Games
-      chess: {
-        name: "Chess Master",
-        icon: "fa-chess",
-        color: "#2d3748",
-        description: "Strategic chess puzzles and endgames",
-        category: "Strategy",
-        difficulty: "Hard",
-        scores: []
-      },
-      memory: {
-        name: "Memory Palace",
-        icon: "fa-memory",
-        color: "#e63946",
-        description: "Test and improve your memory skills",
-        category: "Memory",
-        difficulty: "Medium",
-        scores: []
-      },
-      
-      // Creative Games
-      typing: {
-        name: "Speed Typing",
+      type: {
+        name: "⌨️ TypeRace",
         icon: "fa-keyboard",
-        color: "#f77f00",
-        description: "Type as fast and accurately as possible",
+        color: "#4facfe",
+        description: "Race against the clock! Type the displayed text as fast and accurately as possible.",
         category: "Skill",
         difficulty: "Easy",
+        scores: []
+      },
+      cognitive: {
+        name: "🧠 Cognitive Trainer",
+        icon: "fa-brain",
+        color: "#8b5cf6",
+        description: "Multi-modal challenge! Match colors with mouse actions and shapes with keyboard inputs.",
+        category: "Brain Training",
+        difficulty: "Expert",
         scores: []
       },
       design: {
@@ -221,8 +119,6 @@ async function initializeServer() {
         difficulty: "Medium",
         scores: []
       },
-      
-      // Competitive Programming
       hackathon: {
         name: "Hackathon Sprint",
         icon: "fa-laptop-code",
@@ -243,7 +139,6 @@ async function initializeServer() {
       }
     };
     
-    // Initialize leaderboards for default games
     Object.keys(gamesData).forEach(gameId => {
       leaderboards.set(gameId, new RBTree());
     });
@@ -252,9 +147,6 @@ async function initializeServer() {
   }
 }
 
-// API Routes
-
-// Get all games
 app.get('/api/games', (req, res) => {
   const gamesWithStats = {};
   
@@ -273,7 +165,6 @@ app.get('/api/games', (req, res) => {
   res.json(gamesWithStats);
 });
 
-// Create new game
 app.post('/api/games', async (req, res) => {
   try {
     const { name, description, icon, color, category, difficulty } = req.body;
@@ -307,7 +198,6 @@ app.post('/api/games', async (req, res) => {
   }
 });
 
-// Update game
 app.put('/api/games/:gameId', async (req, res) => {
   try {
     const { gameId } = req.params;
@@ -334,7 +224,6 @@ app.put('/api/games/:gameId', async (req, res) => {
   }
 });
 
-// Delete game
 app.delete('/api/games/:gameId', async (req, res) => {
   try {
     const { gameId } = req.params;
@@ -353,7 +242,6 @@ app.delete('/api/games/:gameId', async (req, res) => {
   }
 });
 
-// Get leaderboard for a game
 app.get('/api/games/:gameId/leaderboard', (req, res) => {
   try {
     const { gameId } = req.params;
@@ -370,7 +258,6 @@ app.get('/api/games/:gameId/leaderboard', (req, res) => {
     
     let scores = leaderboard.toArray();
     
-    // Apply time filter
     const now = Date.now();
     if (timeFilter === 'today') {
       scores = scores.filter(s => {
@@ -384,15 +271,12 @@ app.get('/api/games/:gameId/leaderboard', (req, res) => {
       });
     }
     
-    // Apply search filter
     if (search) {
       scores = scores.filter(s => s.playerID.toLowerCase().includes(search.toLowerCase()));
     }
     
-    // Limit results
     scores = scores.slice(0, parseInt(limit));
     
-    // Add timestamp data
     const enrichedScores = scores.map(score => {
       const scoreData = gamesData[gameId].scores.find(s => s.playerID === score.playerID);
       return {
@@ -407,7 +291,6 @@ app.get('/api/games/:gameId/leaderboard', (req, res) => {
   }
 });
 
-// Submit score
 app.post('/api/games/:gameId/scores', async (req, res) => {
   try {
     const { gameId } = req.params;
@@ -424,10 +307,8 @@ app.post('/api/games/:gameId/scores', async (req, res) => {
     const leaderboard = leaderboards.get(gameId);
     const timestamp = Date.now();
     
-    // Update leaderboard
     leaderboard.insertOrUpdate(playerID, score);
     
-    // Update persistent storage
     const existingScoreIndex = gamesData[gameId].scores.findIndex(s => s.playerID === playerID);
     const scoreData = { playerID, score, timestamp };
     
@@ -446,7 +327,34 @@ app.post('/api/games/:gameId/scores', async (req, res) => {
   }
 });
 
-// Get player rank
+app.delete('/api/games/:gameId/scores/:playerID', async (req, res) => {
+  try {
+    const { gameId, playerID } = req.params;
+    
+    if (!gamesData[gameId]) {
+      return res.status(404).json({ error: 'Game not found' });
+    }
+    
+    const leaderboard = leaderboards.get(gameId);
+    const removed = leaderboard.remove(playerID);
+    
+    if (!removed) {
+      return res.status(404).json({ error: 'Score not found' });
+    }
+    
+    const scoreIndex = gamesData[gameId].scores.findIndex(s => s.playerID === playerID);
+    if (scoreIndex >= 0) {
+      gamesData[gameId].scores.splice(scoreIndex, 1);
+    }
+    
+    await saveGames(gamesData);
+    
+    res.json({ message: 'Score deleted successfully', playerID, gameId });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to delete score' });
+  }
+});
+
 app.get('/api/games/:gameId/players/:playerID/rank', (req, res) => {
   try {
     const { gameId, playerID } = req.params;
@@ -469,7 +377,6 @@ app.get('/api/games/:gameId/players/:playerID/rank', (req, res) => {
   }
 });
 
-// User management
 app.post('/api/users/login', async (req, res) => {
   try {
     const { username, email } = req.body;
@@ -499,7 +406,6 @@ app.post('/api/users/login', async (req, res) => {
   }
 });
 
-// Get user profile
 app.get('/api/users/:username', async (req, res) => {
   try {
     const { username } = req.params;
@@ -509,7 +415,6 @@ app.get('/api/users/:username', async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
     
-    // Calculate user statistics
     let totalGames = 0;
     let totalScore = 0;
     let bestRank = null;
@@ -521,14 +426,12 @@ app.get('/api/users/:username', async (req, res) => {
       totalGames += userScores.length;
       totalScore += userScores.reduce((sum, score) => sum + score.score, 0);
       
-      // Get best rank
       const leaderboard = leaderboards.get(gameId);
       const rank = leaderboard.getRank(username);
       if (rank && (!bestRank || rank < bestRank)) {
         bestRank = rank;
       }
       
-      // Add recent scores
       userScores.forEach(score => {
         recentScores.push({
           ...score,
@@ -538,7 +441,6 @@ app.get('/api/users/:username', async (req, res) => {
       });
     });
     
-    // Sort recent scores by timestamp
     recentScores.sort((a, b) => b.timestamp - a.timestamp);
     
     const avgScore = totalGames > 0 ? Math.round(totalScore / totalGames) : 0;
@@ -558,7 +460,6 @@ app.get('/api/users/:username', async (req, res) => {
   }
 });
 
-// Achievements endpoints
 app.get('/api/users/:username/achievements', async (req, res) => {
   try {
     const { username } = req.params;
@@ -568,7 +469,6 @@ app.get('/api/users/:username/achievements', async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
     
-    // Calculate achievements based on user's game history
     const achievements = {
       firstScore: { unlocked: false, progress: 0 },
       speedDemon: { unlocked: false, progress: 0 },
@@ -582,7 +482,6 @@ app.get('/api/users/:username/achievements', async (req, res) => {
     let hasSubmittedScore = false;
     let isChampion = false;
     
-    // Check user's scores across all games
     Object.keys(gamesData).forEach(gameId => {
       const game = gamesData[gameId];
       const userScores = game.scores.filter(score => score.playerID === username);
@@ -591,14 +490,12 @@ app.get('/api/users/:username/achievements', async (req, res) => {
         hasSubmittedScore = true;
         gamesPlayed.add(gameId);
         
-        // Check for champion status
         const leaderboard = leaderboards.get(gameId);
         const rank = leaderboard.getRank(username);
         if (rank === 1) {
           isChampion = true;
         }
         
-        // Check speed demon (racing game score > 1000)
         if (gameId === 'racing') {
           const maxScore = Math.max(...userScores.map(s => s.score));
           if (maxScore >= 1000) {
@@ -607,7 +504,6 @@ app.get('/api/users/:username/achievements', async (req, res) => {
           }
         }
         
-        // Check code ninja (leetcode completions)
         if (gameId === 'leetcode') {
           achievements.codeNinja.progress = userScores.length;
           if (userScores.length >= 10) {
@@ -617,7 +513,6 @@ app.get('/api/users/:username/achievements', async (req, res) => {
       }
     });
     
-    // Set achievement statuses
     if (hasSubmittedScore) {
       achievements.firstScore.unlocked = true;
       achievements.firstScore.progress = 1;
@@ -639,7 +534,6 @@ app.get('/api/users/:username/achievements', async (req, res) => {
   }
 });
 
-// Tournaments endpoints
 app.get('/api/tournaments', (req, res) => {
   try {
     const tournaments = [
@@ -684,7 +578,6 @@ app.get('/api/tournaments', (req, res) => {
   }
 });
 
-// Game statistics endpoint
 app.get('/api/stats', (req, res) => {
   try {
     const stats = {
@@ -710,12 +603,10 @@ app.get('/api/stats', (req, res) => {
   }
 });
 
-// Serve frontend
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 
-// Start server
 initializeServer().then(() => {
   app.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);

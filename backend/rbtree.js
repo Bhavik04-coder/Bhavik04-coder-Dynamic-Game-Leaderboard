@@ -29,9 +29,8 @@ class RBTree {
       });
     this._size = 0;
     this.playerMap = new Map();
-    this.NIL = { color: "black" }; 
+    this.NIL = { color: "black" };
   }
-
 
   remove(playerID) {
     const node = this.playerMap.get(playerID);
@@ -61,7 +60,6 @@ class RBTree {
       y = this.minimum(z.right);
       yOriginalColor = y.color;
       x = y.right;
-
       if (y.parent === z) {
         if (x) x.parent = y;
       } else {
@@ -101,17 +99,14 @@ class RBTree {
     while (x && x !== this.root && x.color === "black") {
       if (x === x.parent.left) {
         let w = x.parent.right;
-
         if (!w) break;
-
         if (w.color === "red") {
           w.color = "black";
           x.parent.color = "red";
           this.rotateLeft(x.parent);
           w = x.parent.right;
-          if (!w) break; 
+          if (!w) break;
         }
-
         const wLeftBlack = !w.left || w.left.color === "black";
         const wRightBlack = !w.right || w.right.color === "black";
 
@@ -124,9 +119,8 @@ class RBTree {
             w.color = "red";
             this.rotateRight(w);
             w = x.parent.right;
-            if (!w) break; 
+            if (!w) break;
           }
-
           w.color = x.parent.color;
           x.parent.color = "black";
           if (w.right) w.right.color = "black";
@@ -135,17 +129,14 @@ class RBTree {
         }
       } else {
         let w = x.parent.left;
-
         if (!w) break;
-
         if (w.color === "red") {
           w.color = "black";
           x.parent.color = "red";
           this.rotateRight(x.parent);
           w = x.parent.left;
-          if (!w) break; 
+          if (!w) break;
         }
-
         const wLeftBlack = !w.left || w.left.color === "black";
         const wRightBlack = !w.right || w.right.color === "black";
 
@@ -158,9 +149,8 @@ class RBTree {
             w.color = "red";
             this.rotateLeft(w);
             w = x.parent.left;
-            if (!w) break; 
+            if (!w) break;
           }
-
           w.color = x.parent.color;
           x.parent.color = "black";
           if (w.left) w.left.color = "black";
@@ -169,7 +159,6 @@ class RBTree {
         }
       }
     }
-
     if (x) x.color = "black";
   }
 
@@ -181,15 +170,12 @@ class RBTree {
     }
   }
 
-
   rotateLeft(x) {
     if (!x || !x.right) return;
-
     const y = x.right;
     x.right = y.left;
     if (y.left) y.left.parent = x;
     y.parent = x.parent;
-
     if (!x.parent) {
       this.root = y;
     } else if (x === x.parent.left) {
@@ -197,22 +183,18 @@ class RBTree {
     } else {
       x.parent.right = y;
     }
-
     y.left = x;
     x.parent = y;
-
     this.updateSubtreeSize(x);
     this.updateSubtreeSize(y);
   }
 
   rotateRight(x) {
     if (!x || !x.left) return;
-
     const y = x.left;
     x.left = y.right;
     if (y.right) y.right.parent = x;
     y.parent = x.parent;
-
     if (!x.parent) {
       this.root = y;
     } else if (x === x.parent.right) {
@@ -220,14 +202,11 @@ class RBTree {
     } else {
       x.parent.left = y;
     }
-
     y.right = x;
     x.parent = y;
-
     this.updateSubtreeSize(x);
     this.updateSubtreeSize(y);
   }
-
 
   find(playerID) {
     return this.playerMap.get(playerID) || null;
@@ -241,20 +220,16 @@ class RBTree {
 
   _findByScore(node, score, results) {
     if (!node) return;
-
     if (node.score === score) {
       results.push(node);
     }
-
     if (score <= node.score) {
       this._findByScore(node.left, score, results);
     }
-
     if (score >= node.score) {
       this._findByScore(node.right, score, results);
     }
   }
-
 
   minimum(node = this.root) {
     if (!node) return null;
@@ -272,15 +247,12 @@ class RBTree {
     return node;
   }
 
-
   getRank(playerID) {
     const node = this.playerMap.get(playerID);
     if (!node) return null;
-
     let rank = 1 + (node.left ? node.left.subtreeSize : 0);
     let y = node;
     let x = node.parent;
-
     while (x) {
       if (y === x.right) {
         rank += 1 + (x.left ? x.left.subtreeSize : 0);
@@ -288,7 +260,6 @@ class RBTree {
       y = x;
       x = x.parent;
     }
-
     return rank;
   }
 
@@ -299,9 +270,7 @@ class RBTree {
 
   _getNodeByRank(node, rank) {
     if (!node) return null;
-
     const leftSize = node.left ? node.left.subtreeSize : 0;
-
     if (rank <= leftSize) {
       return this._getNodeByRank(node.left, rank);
     } else if (rank === leftSize + 1) {
@@ -320,7 +289,6 @@ class RBTree {
 
   _getTopK(node, k, result) {
     if (!node || result.length >= k) return;
-
     this._getTopK(node.left, k, result);
     if (result.length < k) {
       result.push({
@@ -340,15 +308,12 @@ class RBTree {
 
   _getPlayersInRange(node, minScore, maxScore, result) {
     if (!node) return;
-
     if (node.score >= minScore) {
       this._getPlayersInRange(node.left, minScore, maxScore, result);
     }
-
     if (node.score >= minScore && node.score <= maxScore) {
       result.push({ playerID: node.playerID, score: node.score });
     }
-
     if (node.score <= maxScore) {
       this._getPlayersInRange(node.right, minScore, maxScore, result);
     }
@@ -381,7 +346,6 @@ class RBTree {
     return results;
   }
 
-
   insertOrUpdate(playerID, score) {
     let node = this.playerMap.get(playerID);
     if (node) {
@@ -403,7 +367,6 @@ class RBTree {
       if (cmp < 0) x = x.left;
       else x = x.right;
     }
-
     node.parent = y;
     if (!y) {
       this.root = node;
@@ -412,7 +375,6 @@ class RBTree {
       if (cmp < 0) y.left = node;
       else y.right = node;
     }
-
     this._size++;
     this.insertFixup(node);
   }
@@ -535,7 +497,6 @@ class RBTree {
     if (left.blackHeight !== right.blackHeight) {
       return { valid: false, reason: "Black height mismatch" };
     }
-
     return {
       valid: true,
       blackHeight: left.blackHeight + (node.color === "black" ? 1 : 0),
@@ -544,17 +505,14 @@ class RBTree {
 
   printTree(node = this.root, prefix = "", isLeft = true) {
     if (!node) return;
-
     if (node.right) {
       this.printTree(node.right, prefix + (isLeft ? "│   " : "    "), false);
     }
-
     console.log(
       prefix +
         (isLeft ? "└── " : "┌── ") +
         `${node.playerID} (${node.score}) ${node.color}[${node.subtreeSize}]`
     );
-
     if (node.left) {
       this.printTree(node.left, prefix + (isLeft ? "    " : "│   "), true);
     }

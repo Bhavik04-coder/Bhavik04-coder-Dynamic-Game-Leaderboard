@@ -2,7 +2,16 @@
   "bhavik": {
     "username": "Bhavik",
     "email": "bhavik@123",
-    "joinDate": "2025-10-31T13:49:20.325Z",
+    "joinDate": "2025-11-13T06:17:59.939Z",
+    "preferences": {
+      "theme": "default",
+      "notifications": true
+    }
+  },
+  "asdas": {
+    "username": "asdas",
+    "email": "bhavik24@vit.edu",
+    "joinDate": "2025-11-14T17:34:12.763Z",
     "preferences": {
       "theme": "default",
       "notifications": true

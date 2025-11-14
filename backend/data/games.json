@@ -1,29 +1,80 @@
 {
-  "racing": {
-    "name": "Speed Racing",
-    "icon": "fa-car-side",
+  "aim": {
+    "name": "🎯 Aim Trainer",
+    "icon": "fa-bullseye",
     "color": "#f093fb",
-    "description": "Test your racing skills",
-    "scores": []
-  },
-  "puzzle": {
-    "name": "Brain Puzzle",
-    "icon": "fa-puzzle-piece",
-    "color": "#4facfe",
-    "description": "Challenge your mind",
+    "description": "Test your reflexes with escaping buttons! Click targets as they move across the screen.",
+    "category": "Action",
+    "difficulty": "Medium",
     "scores": [
       {
-        "playerID": "Bhavik",
-        "score": 121,
-        "timestamp": 1761919042944
+        "playerID": "asdas",
+        "score": 110,
+        "timestamp": 1763141694328
       }
     ]
   },
-  "shooter": {
-    "name": "Target Shooter",
-    "icon": "fa-crosshairs",
-    "color": "#fa709a",
-    "description": "Aim for perfection",
+  "type": {
+    "name": "⌨️ TypeRace",
+    "icon": "fa-keyboard",
+    "color": "#4facfe",
+    "description": "Race against the clock! Type the displayed text as fast and accurately as possible.",
+    "category": "Skill",
+    "difficulty": "Easy",
+    "scores": [
+      {
+        "playerID": "Bhavik",
+        "score": 14,
+        "timestamp": 1763026227976
+      }
+    ]
+  },
+  "cognitive": {
+    "name": "🧠 Cognitive Trainer",
+    "icon": "fa-brain",
+    "color": "#8b5cf6",
+    "description": "Multi-modal challenge! Match colors with mouse actions and shapes with keyboard inputs.",
+    "category": "Brain Training",
+    "difficulty": "Expert",
+    "scores": [
+      {
+        "playerID": "asdas",
+        "score": 20,
+        "timestamp": 1763141726963
+      }
+    ]
+  },
+  "design": {
+    "name": "UI/UX Challenge",
+    "icon": "fa-paint-brush",
+    "color": "#7209b7",
+    "description": "Create beautiful user interfaces",
+    "category": "Design",
+    "difficulty": "Medium",
+    "scores": [
+      {
+        "playerID": "Bhavik",
+        "score": 10,
+        "timestamp": 1763142920363
+      }
+    ]
+  },
+  "hackathon": {
+    "name": "Hackathon Sprint",
+    "icon": "fa-laptop-code",
+    "color": "#f72585",
+    "description": "Build projects under time pressure",
+    "category": "Programming",
+    "difficulty": "Expert",
+    "scores": []
+  },
+  "cybersecurity": {
+    "name": "Cyber Defense",
+    "icon": "fa-shield-alt",
+    "color": "#264653",
+    "description": "Protect systems from cyber threats",
+    "category": "Security",
+    "difficulty": "Expert",
     "scores": []
   }
 }

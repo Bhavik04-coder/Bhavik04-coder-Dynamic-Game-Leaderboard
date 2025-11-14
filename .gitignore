@@ -1,0 +1,32 @@
+# Node modules
+node_modules/
+backend/node_modules/
+
+# Environment variables
+.env
+.env.local
+
+# Data files (optional - remove if you want to include sample data)
+backend/data/*.json
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build files
+dist/
+build/
+
+# Temporary files
+*.tmp
+*.temp

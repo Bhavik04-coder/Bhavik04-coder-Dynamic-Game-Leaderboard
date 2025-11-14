@@ -7,7 +7,6 @@ const fs = require('fs');
 console.log('🎮 Elite Gaming Leaderboard System');
 console.log('==================================\n');
 
-// Check if node_modules exists
 const nodeModulesPath = path.join(__dirname, 'backend', 'node_modules');
 if (!fs.existsSync(nodeModulesPath)) {
     console.log('📦 Installing dependencies...');
@@ -17,7 +16,7 @@ if (!fs.existsSync(nodeModulesPath)) {
         cwd: path.join(__dirname, 'backend'),
         stdio: 'inherit',
         shell: true
-    });
+    }); 
     
     install.on('close', (code) => {
         if (code === 0) {
@@ -45,7 +44,6 @@ function startServer() {
         console.log(`Server exited with code ${code}`);
     });
     
-    // Handle graceful shutdown
     process.on('SIGINT', () => {
         console.log('\n🛑 Shutting down server...');
         server.kill('SIGINT');

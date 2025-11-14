@@ -14,6 +14,35 @@
             box-sizing: border-box;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
+        ::selection {
+            background: rgba(102, 126, 234, 0.3);
+            color: #2d3748;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #5568d3, #653a8a);
+        }
+
         :root {
             --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
@@ -81,10 +110,40 @@
             width: 100%;
             height: 100%;
             background: 
-                radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 50%);
+                radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.12) 0%, transparent 50%),
+                radial-gradient(circle at 50% 20%, rgba(102, 126, 234, 0.1) 0%, transparent 40%);
             pointer-events: none;
             z-index: 0;
+            animation: backgroundPulse 15s ease-in-out infinite;
+        }
+
+        @keyframes backgroundPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        /* Floating particles effect */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+                radial-gradient(circle, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+            background-size: 50px 50px, 80px 80px;
+            background-position: 0 0, 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+            animation: particleFloat 20s linear infinite;
+        }
+
+        @keyframes particleFloat {
+            from { background-position: 0 0, 40px 40px; }
+            to { background-position: 50px 50px, 90px 90px; }
         }
 
         .page {
@@ -113,16 +172,28 @@
         }
 
         .login-box {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 24px;
-            padding: 50px 40px;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(30px) saturate(180%);
+            border-radius: 28px;
+            padding: 50px 45px;
             width: 100%;
-            max-width: 450px;
-            box-shadow: var(--shadow-heavy);
-            border: 1px solid var(--border-color);
+            max-width: 480px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 8px 20px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.8);
             position: relative;
             overflow: hidden;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .login-box::before {
@@ -132,8 +203,8 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.7s ease;
         }
 
         .login-box:hover::before {
@@ -213,17 +284,41 @@
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
             border: none;
-            border-radius: 12px;
+            border-radius: 14px;
             font-size: 1.1rem;
             font-weight: 700;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             margin-top: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-login::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn-login:hover::before {
+            width: 300px;
+            height: 300px;
         }
 
         .btn-login:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-login:active {
+            transform: translateY(-1px) scale(0.98);
         }
 
         .register-link {
@@ -242,16 +337,33 @@
         }
 
         .navbar {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 16px;
-            padding: 20px 30px;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(30px) saturate(180%);
+            border-radius: 20px;
+            padding: 20px 35px;
             margin-bottom: 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .navbar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .navbar:hover::before {
+            left: 100%;
         }
 
         .navbar-brand {
@@ -366,9 +478,17 @@
         .page-title {
             text-align: center;
             color: white;
-            font-size: 2.5rem;
-            margin-bottom: 30px;
-            font-weight: 800;
+            font-size: 2.8rem;
+            margin-bottom: 35px;
+            font-weight: 900;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            animation: titleFloat 3s ease-in-out infinite;
+            letter-spacing: -0.5px;
+        }
+
+        @keyframes titleFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
         }
 
         /* Game Selection */
@@ -407,20 +527,38 @@
         }
 
         .game-card {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
             overflow: hidden;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            border: 2px solid transparent;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+            border: 2px solid rgba(255, 255, 255, 0.5);
             position: relative;
         }
 
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+
         .game-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-            border-color: #667eea;
+            transform: translateY(-12px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(102, 126, 234, 0.25), 0 10px 20px rgba(0, 0, 0, 0.15);
+            border-color: rgba(102, 126, 234, 0.5);
+        }
+
+        .game-card:hover::before {
+            opacity: 1;
         }
 
         .game-actions {
@@ -513,10 +651,13 @@
 
         /* Leaderboard */
         .leaderboard-container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(30px) saturate(180%);
+            border-radius: 28px;
             overflow: hidden;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.18), 0 10px 25px rgba(0, 0, 0, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            animation: slideUp 0.6s ease-out;
         }
 
         .leaderboard-header {
@@ -859,6 +1000,30 @@
 
         .score-item:last-child {
             border-bottom: none;
+        }
+        
+        .delete-score-btn {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .delete-score-btn:hover {
+            background: linear-gradient(135deg, #ee5a6f, #ff6b6b);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+        
+        .delete-score-btn:active {
+            transform: translateY(0);
         }
 
         /* Modal */
@@ -1494,8 +1659,8 @@
                             <thead>
                                 <tr>
                                     <th style="width: 80px;">Rank</th>
-                                    <th>Player</th>
-                                    <th style="text-align: right;">Score</th>
+                                    <th>Player (All Players)</th>
+                                    <th style="text-align: right;">Score / Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="leaderboardBody">
@@ -1891,6 +2056,15 @@
 
         // Initialize the application
         document.addEventListener('DOMContentLoaded', async function() {
+            // Restore user session if coming back from game
+            const savedUser = sessionStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = { username: savedUser, email: savedUser + '@game.com' };
+                sessionStorage.removeItem('currentUser');
+                showPage('gameSelection');
+                updateUserDisplay();
+            }
+            
             await loadGames();
             
             // Enter key to submit score
@@ -2034,6 +2208,16 @@
             showPage('gameSelection');
         }
 
+        function playGame(gameId) {
+            if (!currentUser) {
+                showAlert('Please log in first', 'error');
+                return;
+            }
+            
+            // Open game in new window or redirect
+            window.location.href = `/games.html?game=${gameId}&user=${currentUser.username}`;
+        }
+
         function renderGamesGrid() {
             const grid = document.getElementById('gamesGrid');
             grid.innerHTML = '';
@@ -2061,10 +2245,10 @@
                 
                 gameCard.innerHTML = `
                     <div class="game-actions">
-                        <button class="game-action-btn btn-edit" onclick="editGame('${gameId}')">
+                        <button class="game-action-btn btn-edit" onclick="event.stopPropagation(); editGame('${gameId}')">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button class="game-action-btn btn-delete" onclick="deleteGame('${gameId}')">
+                        <button class="game-action-btn btn-delete" onclick="event.stopPropagation(); deleteGame('${gameId}')">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
@@ -2085,8 +2269,37 @@
                             <span class="label">Top Score</span>
                         </div>
                     </div>
+                    <div style="padding: 20px; display: flex; gap: 10px;">
+                        <button onclick="event.stopPropagation(); playGame('${gameId}')" style="
+                            flex: 1;
+                            padding: 12px 20px;
+                            background: linear-gradient(135deg, #48bb78, #38a169);
+                            color: white;
+                            border: none;
+                            border-radius: 12px;
+                            font-weight: 700;
+                            cursor: pointer;
+                            transition: all 0.3s ease;
+                            font-size: 0.95rem;
+                        " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(72, 187, 120, 0.4)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <i class="fas fa-play"></i> Play
+                        </button>
+                        <button onclick="event.stopPropagation(); selectGame('${gameId}')" style="
+                            flex: 1;
+                            padding: 12px 20px;
+                            background: linear-gradient(135deg, #667eea, #764ba2);
+                            color: white;
+                            border: none;
+                            border-radius: 12px;
+                            font-weight: 700;
+                            cursor: pointer;
+                            transition: all 0.3s ease;
+                            font-size: 0.95rem;
+                        " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(102, 126, 234, 0.4)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <i class="fas fa-trophy"></i> Leaderboard
+                        </button>
+                    </div>
                 `;
-                gameCard.onclick = () => selectGame(gameId);
                 grid.appendChild(gameCard);
             });
         }
@@ -2139,6 +2352,9 @@
                 document.getElementById('scoreInput').value = '';
                 showAlert(`Score ${score.toLocaleString()} submitted! Your rank: #${result.rank}`, 'success');
                 
+                // Check for achievements
+                checkAchievements(currentGame, score, result.rank);
+                
                 await loadLeaderboard();
                 await loadGames(); // Refresh game stats
             } catch (error) {
@@ -2162,6 +2378,29 @@
 
         async function searchPlayers() {
             await loadLeaderboard();
+        }
+
+        async function deleteMyScore(playerID) {
+            if (!currentUser || playerID !== currentUser.username) {
+                showAlert('You can only delete your own score', 'error');
+                return;
+            }
+
+            if (!confirm('Are you sure you want to delete your score? This cannot be undone.')) {
+                return;
+            }
+
+            try {
+                await apiRequest(`/games/${currentGame}/scores/${playerID}`, {
+                    method: 'DELETE'
+                });
+
+                showAlert('Your score has been deleted', 'success');
+                await loadLeaderboard();
+                await loadGames(); // Refresh game stats
+            } catch (error) {
+                showAlert('Failed to delete score. Please try again.', 'error');
+            }
         }
 
         async function loadLeaderboard() {
@@ -2220,20 +2459,41 @@
                 const rank = player.rank;
                 const rankClass = rank <= 3 ? `rank-${rank}` : 'rank-other';
                 const initial = player.playerID[0].toUpperCase();
+                const isCurrentUser = currentUser && player.playerID === currentUser.username;
                 
                 return `
-                    <tr>
+                    <tr style="${isCurrentUser ? 'background: #f0fff4; border-left: 4px solid #48bb78;' : ''}">
                         <td>
                             <div class="rank-badge ${rankClass}">${rank}</div>
                         </td>
                         <td>
                             <div class="player-info">
                                 <div class="player-avatar-small">${initial}</div>
-                                <span style="font-weight: 600; color: #2d3748;">${escapeHtml(player.playerID)}</span>
+                                <span style="font-weight: 600; color: #2d3748;">
+                                    ${escapeHtml(player.playerID)}
+                                    ${isCurrentUser ? '<span style="color: #48bb78; font-size: 0.8em; margin-left: 5px;">(You)</span>' : ''}
+                                </span>
                             </div>
                         </td>
                         <td style="text-align: right;">
-                            <span class="score-badge">${player.score.toLocaleString()}</span>
+                            <div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px;">
+                                <span class="score-badge">${player.score.toLocaleString()}</span>
+                                ${isCurrentUser ? `
+                                    <button onclick="deleteMyScore('${player.playerID}')" style="
+                                        background: #f56565;
+                                        color: white;
+                                        border: none;
+                                        padding: 6px 12px;
+                                        border-radius: 8px;
+                                        cursor: pointer;
+                                        font-size: 0.85em;
+                                        font-weight: 600;
+                                        transition: all 0.3s ease;
+                                    " onmouseover="this.style.background='#e53e3e'" onmouseout="this.style.background='#f56565'">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                ` : ''}
+                            </div>
                         </td>
                     </tr>
                 `;
@@ -2246,13 +2506,11 @@
             try {
                 const userProfile = await apiRequest(`/users/${currentUser.username}`);
                 
-                // Update profile stats
                 document.getElementById('totalGames').textContent = userProfile.stats.totalGames;
                 document.getElementById('totalScore').textContent = userProfile.stats.totalScore.toLocaleString();
                 document.getElementById('avgScore').textContent = userProfile.stats.avgScore.toLocaleString();
                 document.getElementById('bestRank').textContent = userProfile.stats.bestRank ? `#${userProfile.stats.bestRank}` : '-';
                 
-                // Update recent scores
                 const scoresList = document.getElementById('userScoresList');
                 scoresList.innerHTML = '';
                 
@@ -2271,25 +2529,57 @@
                     const scoreItem = document.createElement('div');
                     scoreItem.className = 'score-item';
                     scoreItem.innerHTML = `
-                        <div>
+                        <div style="flex: 1; cursor: pointer;">
                             <strong>${escapeHtml(score.game)}</strong>
                             <div style="color: #718096; font-size: 0.9rem;">
                                 ${new Date(score.timestamp).toLocaleDateString()}
                             </div>
                         </div>
-                        <span class="score-badge">${score.score.toLocaleString()}</span>
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <span class="score-badge">${score.score.toLocaleString()}</span>
+                            <button class="delete-score-btn" data-game-id="${score.gameId}" data-player-id="${currentUser.username}" title="Delete this score">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
                     `;
-                    scoreItem.onclick = async () => {
+                    
+                    const gameDiv = scoreItem.querySelector('div[style*="cursor: pointer"]');
+                    gameDiv.onclick = async () => {
                         currentGame = score.gameId;
                         showPage('leaderboardPage');
                         renderGameTabs();
                         await loadLeaderboard();
                     };
+                    
+                    const deleteBtn = scoreItem.querySelector('.delete-score-btn');
+                    deleteBtn.onclick = async (e) => {
+                        e.stopPropagation();
+                        await deleteScore(score.gameId, currentUser.username);
+                    };
+                    
                     scoresList.appendChild(scoreItem);
                 });
             } catch (error) {
                 console.error('Failed to load user profile:', error);
                 showAlert('Failed to load profile data', 'error');
+            }
+        }
+        
+        async function deleteScore(gameId, playerID) {
+            if (!confirm('Are you sure you want to delete this score?')) {
+                return;
+            }
+            
+            try {
+                await apiRequest(`/games/${gameId}/scores/${playerID}`, {
+                    method: 'DELETE'
+                });
+                
+                showAlert('Score deleted successfully!', 'success');
+                await updateProfilePage();
+            } catch (error) {
+                console.error('Failed to delete score:', error);
+                showAlert('Failed to delete score', 'error');
             }
         }
 
@@ -2461,7 +2751,7 @@
         });
 
         // Achievements System
-        const achievements = {
+        let achievements = {
             firstScore: {
                 id: 'firstScore',
                 title: 'First Steps',
@@ -2475,42 +2765,72 @@
             speedDemon: {
                 id: 'speedDemon',
                 title: 'Speed Demon',
-                description: 'Score over 1000 in Speed Racing',
+                description: 'Score over 200 in Aim Trainer',
                 icon: 'fa-tachometer-alt',
                 points: 25,
                 unlocked: false,
                 progress: 0,
-                maxProgress: 1000
+                maxProgress: 200
             },
-            codeNinja: {
-                id: 'codeNinja',
-                title: 'Code Ninja',
-                description: 'Complete 10 LeetCode challenges',
-                icon: 'fa-code',
+            typingMaster: {
+                id: 'typingMaster',
+                title: 'Typing Master',
+                description: 'Reach 60 WPM in TypeRace',
+                icon: 'fa-keyboard',
+                points: 30,
+                unlocked: false,
+                progress: 0,
+                maxProgress: 60
+            },
+            brainiac: {
+                id: 'brainiac',
+                title: 'Brainiac',
+                description: 'Score 500+ in Cognitive Trainer',
+                icon: 'fa-brain',
+                points: 40,
+                unlocked: false,
+                progress: 0,
+                maxProgress: 500
+            },
+            designer: {
+                id: 'designer',
+                title: 'Design Pro',
+                description: 'Score 100+ in UI/UX Challenge',
+                icon: 'fa-paint-brush',
+                points: 35,
+                unlocked: false,
+                progress: 0,
+                maxProgress: 100
+            },
+            hacker: {
+                id: 'hacker',
+                title: 'Elite Hacker',
+                description: 'Score 150+ in Hackathon Sprint',
+                icon: 'fa-laptop-code',
+                points: 45,
+                unlocked: false,
+                progress: 0,
+                maxProgress: 150
+            },
+            defender: {
+                id: 'defender',
+                title: 'Cyber Guardian',
+                description: 'Score 200+ in Cyber Defense',
+                icon: 'fa-shield-alt',
                 points: 50,
                 unlocked: false,
                 progress: 0,
-                maxProgress: 10
-            },
-            perfectionist: {
-                id: 'perfectionist',
-                title: 'Perfectionist',
-                description: 'Get a perfect score in any game',
-                icon: 'fa-star',
-                points: 100,
-                unlocked: false,
-                progress: 0,
-                maxProgress: 1
+                maxProgress: 200
             },
             socialButterfly: {
                 id: 'socialButterfly',
                 title: 'Social Butterfly',
-                description: 'Play 5 different games',
+                description: 'Play 3 different games',
                 icon: 'fa-users',
                 points: 30,
                 unlocked: false,
                 progress: 0,
-                maxProgress: 5
+                maxProgress: 3
             },
             champion: {
                 id: 'champion',
@@ -2521,11 +2841,53 @@
                 unlocked: false,
                 progress: 0,
                 maxProgress: 1
+            },
+            dedicated: {
+                id: 'dedicated',
+                title: 'Dedicated Player',
+                description: 'Play 10 games total',
+                icon: 'fa-fire',
+                points: 50,
+                unlocked: false,
+                progress: 0,
+                maxProgress: 10
             }
         };
 
+        // Load achievements from localStorage
+        function loadAchievements() {
+            const saved = localStorage.getItem('achievements_' + (currentUser ? currentUser.username : 'guest'));
+            if (saved) {
+                const savedAchievements = JSON.parse(saved);
+                Object.keys(savedAchievements).forEach(key => {
+                    if (achievements[key]) {
+                        achievements[key] = savedAchievements[key];
+                    }
+                });
+            }
+        }
+
+        // Save achievements to localStorage
+        function saveAchievements() {
+            if (currentUser) {
+                localStorage.setItem('achievements_' + currentUser.username, JSON.stringify(achievements));
+            }
+        }
+
         function checkAchievements(gameId, score, rank) {
+            loadAchievements();
             let newAchievements = [];
+            
+            // Track games played
+            let gamesPlayed = JSON.parse(localStorage.getItem('gamesPlayed_' + currentUser.username) || '{}');
+            if (!gamesPlayed[gameId]) {
+                gamesPlayed[gameId] = 0;
+            }
+            gamesPlayed[gameId]++;
+            localStorage.setItem('gamesPlayed_' + currentUser.username, JSON.stringify(gamesPlayed));
+            
+            const uniqueGames = Object.keys(gamesPlayed).length;
+            const totalGames = Object.values(gamesPlayed).reduce((a, b) => a + b, 0);
             
             // First Score
             if (!achievements.firstScore.unlocked) {
@@ -2534,19 +2896,78 @@
                 newAchievements.push(achievements.firstScore);
             }
             
-            // Speed Demon
-            if (gameId === 'racing' && score >= 1000 && !achievements.speedDemon.unlocked) {
-                achievements.speedDemon.unlocked = true;
-                achievements.speedDemon.progress = score;
-                newAchievements.push(achievements.speedDemon);
+            // Game-specific achievements
+            if (gameId === 'aim' && score >= 200) {
+                achievements.speedDemon.progress = Math.max(achievements.speedDemon.progress, score);
+                if (!achievements.speedDemon.unlocked) {
+                    achievements.speedDemon.unlocked = true;
+                    newAchievements.push(achievements.speedDemon);
+                }
             }
             
-            // Champion
+            if (gameId === 'type' && score >= 60) {
+                achievements.typingMaster.progress = Math.max(achievements.typingMaster.progress, score);
+                if (!achievements.typingMaster.unlocked) {
+                    achievements.typingMaster.unlocked = true;
+                    newAchievements.push(achievements.typingMaster);
+                }
+            }
+            
+            if (gameId === 'cognitive' && score >= 500) {
+                achievements.brainiac.progress = Math.max(achievements.brainiac.progress, score);
+                if (!achievements.brainiac.unlocked) {
+                    achievements.brainiac.unlocked = true;
+                    newAchievements.push(achievements.brainiac);
+                }
+            }
+            
+            if (gameId === 'design' && score >= 100) {
+                achievements.designer.progress = Math.max(achievements.designer.progress, score);
+                if (!achievements.designer.unlocked) {
+                    achievements.designer.unlocked = true;
+                    newAchievements.push(achievements.designer);
+                }
+            }
+            
+            if (gameId === 'hackathon' && score >= 150) {
+                achievements.hacker.progress = Math.max(achievements.hacker.progress, score);
+                if (!achievements.hacker.unlocked) {
+                    achievements.hacker.unlocked = true;
+                    newAchievements.push(achievements.hacker);
+                }
+            }
+            
+            if (gameId === 'cybersecurity' && score >= 200) {
+                achievements.defender.progress = Math.max(achievements.defender.progress, score);
+                if (!achievements.defender.unlocked) {
+                    achievements.defender.unlocked = true;
+                    newAchievements.push(achievements.defender);
+                }
+            }
+            
+            // Social Butterfly - Play 3 different games
+            achievements.socialButterfly.progress = uniqueGames;
+            if (uniqueGames >= 3 && !achievements.socialButterfly.unlocked) {
+                achievements.socialButterfly.unlocked = true;
+                newAchievements.push(achievements.socialButterfly);
+            }
+            
+            // Dedicated Player - Play 10 games total
+            achievements.dedicated.progress = totalGames;
+            if (totalGames >= 10 && !achievements.dedicated.unlocked) {
+                achievements.dedicated.unlocked = true;
+                newAchievements.push(achievements.dedicated);
+            }
+            
+            // Champion - Reach #1
             if (rank === 1 && !achievements.champion.unlocked) {
                 achievements.champion.unlocked = true;
                 achievements.champion.progress = 1;
                 newAchievements.push(achievements.champion);
             }
+            
+            // Save achievements
+            saveAchievements();
             
             // Show notifications for new achievements
             newAchievements.forEach(achievement => {
@@ -2753,6 +3174,7 @@
                     renderGamesGrid();
                 } else if (pageId === 'achievementsPage') {
                     document.querySelector('.nav-item:nth-child(2)').classList.add('active');
+                    loadAchievements();
                     renderAchievements();
                 } else if (pageId === 'tournamentsPage') {
                     document.querySelector('.nav-item:nth-child(3)').classList.add('active');

@@ -1,0 +1,1767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Play Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.12) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+            animation: backgroundPulse 15s ease-in-out infinite;
+        }
+
+        @keyframes backgroundPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .game-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(30px) saturate(180%);
+            border-radius: 28px;
+            padding: 35px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.18), 0 10px 25px rgba(0, 0, 0, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            position: relative;
+            z-index: 1;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .back-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 14px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 700;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .back-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .back-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+
+        .score-display {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1.1em;
+        }
+
+        .game-canvas-container {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 3px solid transparent;
+            background-clip: padding-box;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.05), 0 4px 15px rgba(102, 126, 234, 0.15);
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .game-canvas-container::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 20px;
+            z-index: -1;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .stats-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            border-left: 4px solid #667eea;
+        }
+
+        .stat-label {
+            color: #718096;
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: 800;
+            color: #667eea;
+        }
+
+        .game-controls {
+            text-align: center;
+        }
+
+        .start-btn, .restart-btn {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            margin: 0 10px;
+        }
+
+        .start-btn:hover, .restart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(72, 187, 120, 0.4);
+        }
+
+        .start-btn:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .game-over-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(42, 61, 69, 0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
+            font-size: 2em;
+            z-index: 10;
+            border-radius: 16px;
+        }
+
+        .game-over-overlay.active {
+            display: flex;
+        }
+
+        .typing-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            border: 3px solid #667eea;
+            border-radius: 12px;
+            margin-top: 20px;
+            outline: none;
+            font-family: 'Courier New', monospace;
+        }
+
+        .typing-text {
+            font-size: 1.5em;
+            line-height: 1.8;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            font-family: 'Courier New', monospace;
+            color: #2d3748;
+        }
+
+        .typing-text .correct {
+            color: #48bb78;
+            background: rgba(72, 187, 120, 0.15);
+        }
+
+        .typing-text .incorrect {
+            color: #f56565;
+            background: rgba(245, 101, 101, 0.15);
+        }
+
+        .typing-text .current {
+            background: #667eea;
+            color: white;
+        }
+
+        .instructions {
+            background: #edf2f7;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            color: #4a5568;
+            font-weight: 600;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container" id="gameContainer">
+        <!-- Game content will be loaded here -->
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        let currentUser = null;
+        let currentGameId = null;
+        let currentGameName = null;
+
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const gameType = urlParams.get('game');
+        const username = urlParams.get('user');
+
+        if (!gameType || !username) {
+            window.location.href = '/';
+        }
+
+        currentUser = username;
+
+        // Load appropriate game
+        if (gameType === 'aim') {
+            loadAimTrainer();
+        } else if (gameType === 'type') {
+            loadTypeRace();
+        } else if (gameType === 'cognitive') {
+            loadCognitiveTrainer();
+        } else if (gameType === 'design') {
+            loadUIUXChallenge();
+        } else if (gameType === 'hackathon') {
+            loadHackathonSprint();
+        } else if (gameType === 'cybersecurity') {
+            loadCyberDefense();
+        } else {
+            window.location.href = '/';
+        }
+
+        function backToMain() {
+            // Store user in sessionStorage before navigating back
+            if (currentUser) {
+                sessionStorage.setItem('currentUser', currentUser);
+            }
+            window.location.href = '/';
+        }
+
+        let lastScoreSubmit = 0;
+        let submitThrottle = 500; // Submit every 500ms max
+
+        async function submitScore(score) {
+            try {
+                const response = await fetch(`${API_URL}/games/${currentGameId}/scores`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        playerID: currentUser,
+                        score: score
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Score submitted:', data);
+                    return data;
+                }
+            } catch (error) {
+                console.error('Error submitting score:', error);
+            }
+        }
+
+        async function submitScoreLive(score) {
+            const now = Date.now();
+            if (now - lastScoreSubmit < submitThrottle) {
+                return; // Throttle to avoid too many requests
+            }
+            lastScoreSubmit = now;
+            
+            try {
+                await fetch(`${API_URL}/games/${currentGameId}/scores`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        playerID: currentUser,
+                        score: score
+                    })
+                });
+            } catch (error) {
+                // Silent fail for live updates
+            }
+        }
+
+        // ==================== AIM TRAINER ====================
+        function loadAimTrainer() {
+            currentGameId = 'aim';
+            currentGameName = 'Aim Trainer';
+            
+            document.getElementById('gameContainer').innerHTML = `
+                <div class="game-header">
+                    <button class="back-btn" onclick="backToMain()">← Back to Leaderboard</button>
+                    <div class="score-display">
+                        <div>Player: ${currentUser}</div>
+                        <div style="font-size: 0.8em; margin-top: 5px; color: #48bb78;">
+                            <i class="fas fa-sync-alt" style="animation: spin 2s linear infinite;"></i> Live Score Updates
+                        </div>
+                    </div>
+                </div>
+                <div class="instructions">
+                    🎯 Click the moving targets before they disappear! You have 30 seconds. Your score updates live on the leaderboard!
+                </div>
+                <div class="game-canvas-container">
+                    <canvas id="gameCanvas"></canvas>
+                    <div class="game-over-overlay" id="gameOver">
+                        <div>Game Over!</div>
+                        <div style="font-size: 0.6em; margin-top: 20px;">Final Score: <span id="finalScore">0</span></div>
+                        <div style="font-size: 0.4em; margin-top: 10px;">Score submitted to leaderboard!</div>
+                    </div>
+                </div>
+                <div class="stats-panel">
+                    <div class="stat-box">
+                        <div class="stat-label">Score</div>
+                        <div class="stat-value" id="score">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Accuracy</div>
+                        <div class="stat-value" id="accuracy">100%</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Hits</div>
+                        <div class="stat-value" id="hits">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Time Left</div>
+                        <div class="stat-value" id="timeLeft">30s</div>
+                    </div>
+                </div>
+                <div class="game-controls">
+                    <button class="start-btn" id="startBtn" onclick="startAimGame()">Start Game</button>
+                    <button class="restart-btn" onclick="restartAimGame()" style="display:none;" id="restartBtn">Play Again</button>
+                </div>
+            `;
+            
+            initAimGame();
+        }
+
+        let aimGameState = {
+            canvas: null,
+            ctx: null,
+            running: false,
+            score: 0,
+            hits: 0,
+            misses: 0,
+            totalClicks: 0,
+            targets: [],
+            lastTargetTime: 0,
+            gameTime: 30000,
+            startTime: 0
+        };
+
+        function initAimGame() {
+            // Wait for DOM to be ready
+            setTimeout(() => {
+                aimGameState.canvas = document.getElementById('gameCanvas');
+                if (!aimGameState.canvas) {
+                    console.error('Canvas not found!');
+                    return;
+                }
+                aimGameState.ctx = aimGameState.canvas.getContext('2d');
+                resizeCanvas();
+                window.addEventListener('resize', resizeCanvas);
+            }, 200);
+        }
+
+        function resizeCanvas() {
+            if (!aimGameState.canvas) return;
+            const container = aimGameState.canvas.parentElement;
+            if (!container) return;
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            
+            // Set canvas size
+            aimGameState.canvas.width = width;
+            aimGameState.canvas.height = height;
+            
+            // Clear canvas
+            if (aimGameState.ctx) {
+                aimGameState.ctx.clearRect(0, 0, width, height);
+            }
+        }
+
+        function startAimGame() {
+            if (!aimGameState.canvas || !aimGameState.ctx) {
+                alert('Game is still loading, please wait a moment and try again.');
+                return;
+            }
+            
+            aimGameState.running = true;
+            aimGameState.score = 0;
+            aimGameState.hits = 0;
+            aimGameState.misses = 0;
+            aimGameState.totalClicks = 0;
+            aimGameState.targets = [];
+            aimGameState.startTime = Date.now();
+            aimGameState.lastTargetTime = 0;
+            
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('restartBtn').style.display = 'inline-block';
+            document.getElementById('gameOver').classList.remove('active');
+            
+            aimGameState.canvas.addEventListener('click', handleAimClick);
+            aimGameLoop();
+        }
+
+        function handleAimClick(e) {
+            if (!aimGameState.running) return;
+            
+            const rect = aimGameState.canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            aimGameState.totalClicks++;
+            let hitTarget = false;
+            
+            for (let i = aimGameState.targets.length - 1; i >= 0; i--) {
+                const target = aimGameState.targets[i];
+                const dx = x - target.x;
+                const dy = y - target.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < target.radius) {
+                    hitTarget = true;
+                    aimGameState.hits++;
+                    aimGameState.score += 10;
+                    aimGameState.targets.splice(i, 1);
+                    break;
+                }
+            }
+            
+            if (!hitTarget) {
+                aimGameState.misses++;
+            }
+            
+            updateAimStats();
+        }
+
+        function aimGameLoop() {
+            if (!aimGameState.running) return;
+            
+            const elapsed = Date.now() - aimGameState.startTime;
+            if (elapsed >= aimGameState.gameTime) {
+                endAimGame();
+                return;
+            }
+            
+            aimGameState.ctx.clearRect(0, 0, aimGameState.canvas.width, aimGameState.canvas.height);
+            
+            if (Date.now() - aimGameState.lastTargetTime > 1000) {
+                spawnTarget();
+                aimGameState.lastTargetTime = Date.now();
+            }
+            
+            for (let i = aimGameState.targets.length - 1; i >= 0; i--) {
+                const target = aimGameState.targets[i];
+                
+                target.x += target.vx;
+                target.y += target.vy;
+                
+                if (target.x < target.radius || target.x > aimGameState.canvas.width - target.radius) {
+                    target.vx *= -1;
+                }
+                if (target.y < target.radius || target.y > aimGameState.canvas.height - target.radius) {
+                    target.vy *= -1;
+                }
+                
+                if (Date.now() - target.spawnTime > 3000) {
+                    aimGameState.targets.splice(i, 1);
+                    continue;
+                }
+                
+                aimGameState.ctx.beginPath();
+                aimGameState.ctx.arc(target.x, target.y, target.radius, 0, Math.PI * 2);
+                aimGameState.ctx.fillStyle = target.color;
+                aimGameState.ctx.fill();
+                aimGameState.ctx.strokeStyle = '#2d3748';
+                aimGameState.ctx.lineWidth = 3;
+                aimGameState.ctx.stroke();
+            }
+            
+            const timeLeft = Math.ceil((aimGameState.gameTime - elapsed) / 1000);
+            document.getElementById('timeLeft').textContent = timeLeft + 's';
+            
+            requestAnimationFrame(aimGameLoop);
+        }
+
+        function spawnTarget() {
+            const radius = 30;
+            const colors = ['#667eea', '#764ba2', '#48bb78', '#f56565', '#ed8936'];
+            const target = {
+                x: Math.random() * (aimGameState.canvas.width - radius * 2) + radius,
+                y: Math.random() * (aimGameState.canvas.height - radius * 2) + radius,
+                radius: radius,
+                vx: (Math.random() - 0.5) * 4,
+                vy: (Math.random() - 0.5) * 4,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                spawnTime: Date.now()
+            };
+            aimGameState.targets.push(target);
+        }
+
+        function updateAimStats() {
+            document.getElementById('score').textContent = aimGameState.score;
+            document.getElementById('hits').textContent = aimGameState.hits;
+            
+            const accuracy = aimGameState.totalClicks > 0 
+                ? ((aimGameState.hits / aimGameState.totalClicks) * 100).toFixed(1) 
+                : 100;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+            
+            // Live score update
+            submitScoreLive(aimGameState.score);
+        }
+
+        async function endAimGame() {
+            aimGameState.running = false;
+            aimGameState.canvas.removeEventListener('click', handleAimClick);
+            
+            document.getElementById('finalScore').textContent = aimGameState.score;
+            document.getElementById('gameOver').classList.add('active');
+            
+            await submitScore(aimGameState.score);
+        }
+
+        function restartAimGame() {
+            startAimGame();
+        }
+
+        // ==================== TYPE RACE ====================
+        function loadTypeRace() {
+            currentGameId = 'type';
+            currentGameName = 'TypeRace';
+            
+            document.getElementById('gameContainer').innerHTML = `
+                <div class="game-header">
+                    <button class="back-btn" onclick="backToMain()">← Back to Leaderboard</button>
+                    <div class="score-display">
+                        <div>Player: ${currentUser}</div>
+                        <div style="font-size: 0.8em; margin-top: 5px; color: #48bb78;">
+                            <i class="fas fa-sync-alt" style="animation: spin 2s linear infinite;"></i> Live Score Updates
+                        </div>
+                    </div>
+                </div>
+                <div class="instructions">
+                    ⌨️ Type the text as fast and accurately as possible! Your WPM updates live on the leaderboard!
+                </div>
+                <div class="game-canvas-container" style="height: auto; min-height: 300px; padding: 30px;">
+                    <div class="typing-text" id="typingText"></div>
+                    <input type="text" class="typing-input" id="typingInput" placeholder="Click Start to begin..." disabled>
+                    <div class="game-over-overlay" id="gameOver">
+                        <div>Race Complete!</div>
+                        <div style="font-size: 0.6em; margin-top: 20px;">WPM: <span id="finalScore">0</span></div>
+                        <div style="font-size: 0.4em; margin-top: 10px;">Score submitted to leaderboard!</div>
+                    </div>
+                </div>
+                <div class="stats-panel">
+                    <div class="stat-box">
+                        <div class="stat-label">WPM</div>
+                        <div class="stat-value" id="wpm">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Accuracy</div>
+                        <div class="stat-value" id="accuracy">100%</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Time</div>
+                        <div class="stat-value" id="time">0s</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Characters</div>
+                        <div class="stat-value" id="chars">0/0</div>
+                    </div>
+                </div>
+                <div class="game-controls">
+                    <button class="start-btn" id="startBtn" onclick="startTypeGame()">Start Race</button>
+                    <button class="restart-btn" onclick="restartTypeGame()" style="display:none;" id="restartBtn">Race Again</button>
+                </div>
+            `;
+            
+            initTypeGame();
+        }
+
+        const typeTexts = [
+            "The quick brown fox jumps over the lazy dog near the riverbank.",
+            "Programming is the art of telling another human what one wants the computer to do.",
+            "Practice makes perfect when it comes to improving typing speed and accuracy.",
+            "Web development combines creativity with logical thinking to build amazing experiences.",
+            "Success is not final failure is not fatal it is the courage to continue that counts."
+        ];
+
+        let typeGameState = {
+            running: false,
+            currentText: '',
+            currentIndex: 0,
+            startTime: 0,
+            errors: 0,
+            intervalId: null
+        };
+
+        function initTypeGame() {
+            document.getElementById('typingInput').addEventListener('input', handleTyping);
+        }
+
+        function startTypeGame() {
+            typeGameState.running = true;
+            typeGameState.currentText = typeTexts[Math.floor(Math.random() * typeTexts.length)];
+            typeGameState.currentIndex = 0;
+            typeGameState.errors = 0;
+            typeGameState.startTime = Date.now();
+            
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('restartBtn').style.display = 'inline-block';
+            document.getElementById('gameOver').classList.remove('active');
+            document.getElementById('typingInput').disabled = false;
+            document.getElementById('typingInput').value = '';
+            document.getElementById('typingInput').focus();
+            
+            renderTypeText();
+            typeGameState.intervalId = setInterval(updateTypeStats, 100);
+        }
+
+        function handleTyping(e) {
+            if (!typeGameState.running) return;
+            
+            const input = e.target.value;
+            const expected = typeGameState.currentText.substring(0, input.length);
+            
+            if (input === typeGameState.currentText) {
+                endTypeGame();
+                return;
+            }
+            
+            if (input !== expected) {
+                typeGameState.errors++;
+            }
+            
+            typeGameState.currentIndex = input.length;
+            renderTypeText();
+        }
+
+        function renderTypeText() {
+            const input = document.getElementById('typingInput').value;
+            const text = typeGameState.currentText;
+            let html = '';
+            
+            for (let i = 0; i < text.length; i++) {
+                if (i < input.length) {
+                    if (text[i] === input[i]) {
+                        html += `<span class="correct">${text[i]}</span>`;
+                    } else {
+                        html += `<span class="incorrect">${text[i]}</span>`;
+                    }
+                } else if (i === input.length) {
+                    html += `<span class="current">${text[i]}</span>`;
+                } else {
+                    html += text[i];
+                }
+            }
+            
+            document.getElementById('typingText').innerHTML = html;
+        }
+
+        function updateTypeStats() {
+            if (!typeGameState.running) return;
+            
+            const elapsed = (Date.now() - typeGameState.startTime) / 1000;
+            const input = document.getElementById('typingInput').value;
+            const words = input.trim().split(/\s+/).length;
+            const wpm = Math.round((words / elapsed) * 60);
+            
+            document.getElementById('wpm').textContent = wpm;
+            document.getElementById('time').textContent = elapsed.toFixed(1) + 's';
+            document.getElementById('chars').textContent = `${input.length}/${typeGameState.currentText.length}`;
+            
+            const accuracy = input.length > 0
+                ? (((input.length - typeGameState.errors) / input.length) * 100).toFixed(1)
+                : 100;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+            
+            // Live score update
+            if (wpm > 0) {
+                submitScoreLive(wpm);
+            }
+        }
+
+        async function endTypeGame() {
+            typeGameState.running = false;
+            clearInterval(typeGameState.intervalId);
+            
+            const elapsed = (Date.now() - typeGameState.startTime) / 1000;
+            const words = typeGameState.currentText.trim().split(/\s+/).length;
+            const wpm = Math.round((words / elapsed) * 60);
+            
+            document.getElementById('typingInput').disabled = true;
+            document.getElementById('finalScore').textContent = wpm;
+            document.getElementById('gameOver').classList.add('active');
+            
+            await submitScore(wpm);
+        }
+
+        function restartTypeGame() {
+            document.getElementById('gameOver').classList.remove('active');
+            startTypeGame();
+        }
+
+        // ==================== COGNITIVE TRAINER ====================
+        function loadCognitiveTrainer() {
+            currentGameId = 'cognitive';
+            currentGameName = 'Cognitive Trainer';
+            
+            document.getElementById('gameContainer').innerHTML = `
+                <div class="game-header">
+                    <button class="back-btn" onclick="backToMain()">← Back to Leaderboard</button>
+                    <div class="score-display">
+                        <div>Player: ${currentUser}</div>
+                        <div style="font-size: 0.8em; margin-top: 5px; color: #48bb78;">
+                            <i class="fas fa-sync-alt" style="animation: spin 2s linear infinite;"></i> Live Score Updates
+                        </div>
+                    </div>
+                </div>
+                <div class="instructions">
+                    🧠 Multi-modal challenge! 🔵 Click | 🔴 Press 'R' | 🟡 Press 'S' + Drag | 🟢 Hold Click | 🟣 Press 'K' - Score updates live!
+                </div>
+                <div class="game-canvas-container">
+                    <canvas id="gameCanvas"></canvas>
+                    <div class="game-over-overlay" id="gameOver">
+                        <div>Game Over!</div>
+                        <div style="font-size: 0.6em; margin-top: 20px;">Final Score: <span id="finalScore">0</span></div>
+                        <div style="font-size: 0.4em; margin-top: 10px;">Score submitted to leaderboard!</div>
+                    </div>
+                </div>
+                <div class="stats-panel">
+                    <div class="stat-box">
+                        <div class="stat-label">Score</div>
+                        <div class="stat-value" id="score">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Mouse Accuracy</div>
+                        <div class="stat-value" id="mouseAcc">100%</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Keyboard Precision</div>
+                        <div class="stat-value" id="keyAcc">100%</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Combo</div>
+                        <div class="stat-value" id="combo">0</div>
+                    </div>
+                </div>
+                <div class="game-controls">
+                    <button class="start-btn" id="startBtn" onclick="startCognitiveGame()">Start Game</button>
+                    <button class="restart-btn" onclick="restartCognitiveGame()" style="display:none;" id="restartBtn">Play Again</button>
+                </div>
+            `;
+            
+            initCognitiveGame();
+        }
+
+        const TARGET_TYPES = [
+            { color: '#4a8fb5', shape: 'circle', mouseAction: 'click', keyAction: null, key: null },
+            { color: '#c94d3a', shape: 'triangle', mouseAction: null, keyAction: 'press', key: 'r' },
+            { color: '#e8b04d', shape: 'square', mouseAction: 'drag', keyAction: 'press', key: 's' },
+            { color: '#5a7b6f', shape: 'circle', mouseAction: 'hold', keyAction: null, key: null },
+            { color: '#8b6ba8', shape: 'pentagon', mouseAction: null, keyAction: 'press', key: 'k' }
+        ];
+
+        let cognitiveGameState = {
+            canvas: null,
+            ctx: null,
+            running: false,
+            score: 0,
+            mouseCorrect: 0,
+            mouseTotal: 0,
+            keyCorrect: 0,
+            keyTotal: 0,
+            combo: 0,
+            errors: 0,
+            targets: [],
+            lastTargetTime: 0,
+            gameTime: 45000,
+            startTime: 0,
+            keysPressed: new Set(),
+            mouseDown: false,
+            dragTarget: null
+        };
+
+        function initCognitiveGame() {
+            // Wait for DOM to be ready
+            setTimeout(() => {
+                cognitiveGameState.canvas = document.getElementById('gameCanvas');
+                if (!cognitiveGameState.canvas) {
+                    console.error('Canvas not found for Cognitive Game!');
+                    return;
+                }
+                cognitiveGameState.ctx = cognitiveGameState.canvas.getContext('2d');
+                resizeCanvas();
+            }, 200);
+        }
+
+        function startCognitiveGame() {
+            if (!cognitiveGameState.canvas || !cognitiveGameState.ctx) {
+                alert('Game is still loading, please wait a moment and try again.');
+                return;
+            }
+            
+            cognitiveGameState.running = true;
+            cognitiveGameState.score = 0;
+            cognitiveGameState.mouseCorrect = 0;
+            cognitiveGameState.mouseTotal = 0;
+            cognitiveGameState.keyCorrect = 0;
+            cognitiveGameState.keyTotal = 0;
+            cognitiveGameState.combo = 0;
+            cognitiveGameState.errors = 0;
+            cognitiveGameState.targets = [];
+            cognitiveGameState.startTime = Date.now();
+            cognitiveGameState.lastTargetTime = 0;
+            cognitiveGameState.keysPressed = new Set();
+            cognitiveGameState.mouseDown = false;
+            cognitiveGameState.dragTarget = null;
+            
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('restartBtn').style.display = 'inline-block';
+            document.getElementById('gameOver').classList.remove('active');
+            
+            cognitiveGameState.canvas.addEventListener('mousedown', handleCognitiveMouseDown);
+            cognitiveGameState.canvas.addEventListener('mouseup', handleCognitiveMouseUp);
+            cognitiveGameState.canvas.addEventListener('mousemove', handleCognitiveMouseMove);
+            document.addEventListener('keydown', handleCognitiveKeyDown);
+            document.addEventListener('keyup', handleCognitiveKeyUp);
+            
+            cognitiveGameLoop();
+        }
+
+        function handleCognitiveMouseDown(e) {
+            if (!cognitiveGameState.running) return;
+            cognitiveGameState.mouseDown = true;
+            
+            const rect = cognitiveGameState.canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            checkCognitiveTarget(x, y, 'mousedown');
+        }
+
+        function handleCognitiveMouseUp(e) {
+            if (!cognitiveGameState.running) return;
+            
+            const wasDown = cognitiveGameState.mouseDown;
+            cognitiveGameState.mouseDown = false;
+            cognitiveGameState.dragTarget = null;
+            
+            if (wasDown) {
+                const rect = cognitiveGameState.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                checkCognitiveTarget(x, y, 'mouseup');
+            }
+        }
+
+        function handleCognitiveMouseMove(e) {
+            if (!cognitiveGameState.running || !cognitiveGameState.dragTarget) return;
+            
+            const rect = cognitiveGameState.canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const dx = x - cognitiveGameState.dragTarget.startX;
+            const dy = y - cognitiveGameState.dragTarget.startY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance > 50 && !cognitiveGameState.dragTarget.completed) {
+                handleCorrectAction(cognitiveGameState.dragTarget.target);
+                cognitiveGameState.dragTarget.completed = true;
+            }
+        }
+
+        function handleCognitiveKeyDown(e) {
+            if (!cognitiveGameState.running) return;
+            
+            const key = e.key.toLowerCase();
+            if (cognitiveGameState.keysPressed.has(key)) return;
+            
+            cognitiveGameState.keysPressed.add(key);
+            checkCognitiveKeyAction(key, 'keydown');
+        }
+
+        function handleCognitiveKeyUp(e) {
+            if (!cognitiveGameState.running) return;
+            
+            const key = e.key.toLowerCase();
+            cognitiveGameState.keysPressed.delete(key);
+        }
+
+        function checkCognitiveTarget(x, y, action) {
+            for (let i = cognitiveGameState.targets.length - 1; i >= 0; i--) {
+                const target = cognitiveGameState.targets[i];
+                const dx = x - target.x;
+                const dy = y - target.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < target.size) {
+                    const targetType = TARGET_TYPES[target.typeIndex];
+                    
+                    if (targetType.mouseAction === 'click' && action === 'mousedown') {
+                        handleCorrectAction(target);
+                        return;
+                    } else if (targetType.mouseAction === 'hold' && action === 'mouseup') {
+                        if (cognitiveGameState.mouseDown && Date.now() - target.mouseDownTime > 500) {
+                            handleCorrectAction(target);
+                            return;
+                        }
+                    } else if (targetType.mouseAction === 'drag' && action === 'mousedown') {
+                        if (cognitiveGameState.keysPressed.has(targetType.key)) {
+                            cognitiveGameState.dragTarget = {
+                                target: target,
+                                startX: x,
+                                startY: y,
+                                completed: false
+                            };
+                        }
+                        return;
+                    } else if (targetType.mouseAction === 'hold' && action === 'mousedown') {
+                        target.mouseDownTime = Date.now();
+                        return;
+                    }
+                }
+            }
+        }
+
+        function checkCognitiveKeyAction(key, action) {
+            for (let i = cognitiveGameState.targets.length - 1; i >= 0; i--) {
+                const target = cognitiveGameState.targets[i];
+                const targetType = TARGET_TYPES[target.typeIndex];
+                
+                if (targetType.keyAction === 'press' && targetType.key === key && action === 'keydown') {
+                    if (targetType.mouseAction === 'drag') continue;
+                    handleCorrectAction(target);
+                    return;
+                }
+            }
+        }
+
+        function handleCorrectAction(target) {
+            const targetType = TARGET_TYPES[target.typeIndex];
+            
+            cognitiveGameState.score += 10 + cognitiveGameState.combo;
+            cognitiveGameState.combo++;
+            
+            if (targetType.mouseAction) {
+                cognitiveGameState.mouseCorrect++;
+                cognitiveGameState.mouseTotal++;
+            }
+            if (targetType.keyAction) {
+                cognitiveGameState.keyCorrect++;
+                cognitiveGameState.keyTotal++;
+            }
+            
+            const index = cognitiveGameState.targets.indexOf(target);
+            if (index > -1) {
+                cognitiveGameState.targets.splice(index, 1);
+            }
+            
+            updateCognitiveStats();
+        }
+
+        function cognitiveGameLoop() {
+            if (!cognitiveGameState.running) return;
+            
+            const elapsed = Date.now() - cognitiveGameState.startTime;
+            if (elapsed >= cognitiveGameState.gameTime) {
+                endCognitiveGame();
+                return;
+            }
+            
+            cognitiveGameState.ctx.clearRect(0, 0, cognitiveGameState.canvas.width, cognitiveGameState.canvas.height);
+            
+            if (Date.now() - cognitiveGameState.lastTargetTime > 2000) {
+                spawnCognitiveTarget();
+                cognitiveGameState.lastTargetTime = Date.now();
+            }
+            
+            for (let i = cognitiveGameState.targets.length - 1; i >= 0; i--) {
+                const target = cognitiveGameState.targets[i];
+                const lifespan = Date.now() - target.spawnTime;
+                const maxLife = 4000;
+                
+                if (lifespan > maxLife) {
+                    cognitiveGameState.targets.splice(i, 1);
+                    cognitiveGameState.combo = 0;
+                    cognitiveGameState.errors++;
+                    continue;
+                }
+                
+                const progress = 1 - (lifespan / maxLife);
+                cognitiveGameState.ctx.beginPath();
+                cognitiveGameState.ctx.arc(target.x, target.y, target.size + 10, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * progress));
+                cognitiveGameState.ctx.strokeStyle = '#f56565';
+                cognitiveGameState.ctx.lineWidth = 5;
+                cognitiveGameState.ctx.stroke();
+                
+                const targetType = TARGET_TYPES[target.typeIndex];
+                cognitiveGameState.ctx.fillStyle = targetType.color;
+                drawShape(cognitiveGameState.ctx, target.x, target.y, target.size, targetType.shape);
+            }
+            
+            const timeLeft = Math.ceil((cognitiveGameState.gameTime - elapsed) / 1000);
+            cognitiveGameState.ctx.fillStyle = '#2d3748';
+            cognitiveGameState.ctx.font = 'bold 24px Arial';
+            cognitiveGameState.ctx.fillText(`Time: ${timeLeft}s`, 20, 40);
+            
+            requestAnimationFrame(cognitiveGameLoop);
+        }
+
+        function spawnCognitiveTarget() {
+            const size = 40;
+            const target = {
+                x: Math.random() * (cognitiveGameState.canvas.width - size * 2) + size,
+                y: Math.random() * (cognitiveGameState.canvas.height - size * 2) + size,
+                size: size,
+                typeIndex: Math.floor(Math.random() * TARGET_TYPES.length),
+                spawnTime: Date.now()
+            };
+            cognitiveGameState.targets.push(target);
+        }
+
+        function drawShape(ctx, x, y, size, shape) {
+            ctx.beginPath();
+            
+            if (shape === 'circle') {
+                ctx.arc(x, y, size, 0, Math.PI * 2);
+            } else if (shape === 'triangle') {
+                ctx.moveTo(x, y - size);
+                ctx.lineTo(x - size, y + size);
+                ctx.lineTo(x + size, y + size);
+                ctx.closePath();
+            } else if (shape === 'square') {
+                ctx.rect(x - size, y - size, size * 2, size * 2);
+            } else if (shape === 'pentagon') {
+                for (let i = 0; i < 5; i++) {
+                    const angle = (Math.PI * 2 / 5) * i - Math.PI / 2;
+                    const px = x + size * Math.cos(angle);
+                    const py = y + size * Math.sin(angle);
+                    if (i === 0) ctx.moveTo(px, py);
+                    else ctx.lineTo(px, py);
+                }
+                ctx.closePath();
+            }
+            
+            ctx.fill();
+            ctx.strokeStyle = '#2d3748';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+        }
+
+        function updateCognitiveStats() {
+            document.getElementById('score').textContent = cognitiveGameState.score;
+            
+            const mouseAcc = cognitiveGameState.mouseTotal > 0
+                ? ((cognitiveGameState.mouseCorrect / cognitiveGameState.mouseTotal) * 100).toFixed(1)
+                : 100;
+            document.getElementById('mouseAcc').textContent = mouseAcc + '%';
+            
+            const keyAcc = cognitiveGameState.keyTotal > 0
+                ? ((cognitiveGameState.keyCorrect / cognitiveGameState.keyTotal) * 100).toFixed(1)
+                : 100;
+            document.getElementById('keyAcc').textContent = keyAcc + '%';
+            
+            document.getElementById('combo').textContent = cognitiveGameState.combo;
+            
+            // Live score update
+            submitScoreLive(cognitiveGameState.score);
+        }
+
+        async function endCognitiveGame() {
+            cognitiveGameState.running = false;
+            
+            cognitiveGameState.canvas.removeEventListener('mousedown', handleCognitiveMouseDown);
+            cognitiveGameState.canvas.removeEventListener('mouseup', handleCognitiveMouseUp);
+            cognitiveGameState.canvas.removeEventListener('mousemove', handleCognitiveMouseMove);
+            document.removeEventListener('keydown', handleCognitiveKeyDown);
+            document.removeEventListener('keyup', handleCognitiveKeyUp);
+            
+            document.getElementById('finalScore').textContent = cognitiveGameState.score;
+            document.getElementById('gameOver').classList.add('active');
+            
+            await submitScore(cognitiveGameState.score);
+        }
+
+        function restartCognitiveGame() {
+            startCognitiveGame();
+        }
+
+        // ==================== UI/UX CHALLENGE ====================
+        function loadUIUXChallenge() {
+            currentGameId = 'design';
+            currentGameName = 'UI/UX Challenge';
+            
+            document.getElementById('gameContainer').innerHTML = `
+                <div class="game-header">
+                    <button class="back-btn" onclick="backToMain()">← Back to Leaderboard</button>
+                    <div class="score-display">
+                        <div>Player: ${currentUser}</div>
+                        <div style="font-size: 0.8em; margin-top: 5px; color: #48bb78;">
+                            <i class="fas fa-sync-alt" style="animation: spin 2s linear infinite;"></i> Live Score Updates
+                        </div>
+                    </div>
+                </div>
+                <div class="instructions">
+                    🎨 Match UI elements with their correct design patterns! Score updates live!
+                </div>
+                <div class="game-canvas-container">
+                    <canvas id="gameCanvas"></canvas>
+                    <div class="game-over-overlay" id="gameOver">
+                        <div>Challenge Complete!</div>
+                        <div style="font-size: 0.6em; margin-top: 20px;">Final Score: <span id="finalScore">0</span></div>
+                        <div style="font-size: 0.4em; margin-top: 10px;">Score submitted to leaderboard!</div>
+                    </div>
+                </div>
+                <div class="stats-panel">
+                    <div class="stat-box">
+                        <div class="stat-label">Score</div>
+                        <div class="stat-value" id="score">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Correct</div>
+                        <div class="stat-value" id="correct">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Accuracy</div>
+                        <div class="stat-value" id="accuracy">100%</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Time Left</div>
+                        <div class="stat-value" id="timeLeft">45s</div>
+                    </div>
+                </div>
+                <div class="game-controls">
+                    <button class="start-btn" id="startBtn" onclick="startUIUXGame()">Start Challenge</button>
+                    <button class="restart-btn" onclick="restartUIUXGame()" style="display:none;" id="restartBtn">Try Again</button>
+                </div>
+            `;
+            
+            initUIUXGame();
+        }
+
+        let uiuxGameState = {
+            canvas: null,
+            ctx: null,
+            running: false,
+            score: 0,
+            correct: 0,
+            total: 0,
+            currentQuestion: null,
+            options: [],
+            gameTime: 45000,
+            startTime: 0
+        };
+
+        const uiPatterns = [
+            { name: 'Button', color: '#667eea', shape: 'roundRect' },
+            { name: 'Card', color: '#48bb78', shape: 'rect' },
+            { name: 'Input', color: '#ed8936', shape: 'line' },
+            { name: 'Icon', color: '#f56565', shape: 'circle' },
+            { name: 'Modal', color: '#9f7aea', shape: 'square' }
+        ];
+
+        function initUIUXGame() {
+            setTimeout(() => {
+                uiuxGameState.canvas = document.getElementById('gameCanvas');
+                if (!uiuxGameState.canvas) return;
+                uiuxGameState.ctx = uiuxGameState.canvas.getContext('2d');
+                resizeCanvas();
+            }, 200);
+        }
+
+        function startUIUXGame() {
+            if (!uiuxGameState.canvas || !uiuxGameState.ctx) {
+                alert('Game is still loading, please wait and try again.');
+                return;
+            }
+            
+            uiuxGameState.running = true;
+            uiuxGameState.score = 0;
+            uiuxGameState.correct = 0;
+            uiuxGameState.total = 0;
+            uiuxGameState.startTime = Date.now();
+            
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('restartBtn').style.display = 'inline-block';
+            document.getElementById('gameOver').classList.remove('active');
+            
+            uiuxGameState.canvas.addEventListener('click', handleUIUXClick);
+            generateUIUXQuestion();
+            uiuxGameLoop();
+        }
+
+        function generateUIUXQuestion() {
+            const pattern = uiPatterns[Math.floor(Math.random() * uiPatterns.length)];
+            uiuxGameState.currentQuestion = pattern;
+            
+            // Generate 4 options including correct answer
+            uiuxGameState.options = [pattern];
+            while (uiuxGameState.options.length < 4) {
+                const option = uiPatterns[Math.floor(Math.random() * uiPatterns.length)];
+                if (!uiuxGameState.options.includes(option)) {
+                    uiuxGameState.options.push(option);
+                }
+            }
+            // Shuffle options
+            uiuxGameState.options.sort(() => Math.random() - 0.5);
+        }
+
+        function handleUIUXClick(e) {
+            if (!uiuxGameState.running) return;
+            
+            const rect = uiuxGameState.canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            // Check which option was clicked
+            const optionWidth = uiuxGameState.canvas.width / 4;
+            const optionIndex = Math.floor(x / optionWidth);
+            
+            if (y > uiuxGameState.canvas.height - 100 && optionIndex < 4) {
+                uiuxGameState.total++;
+                if (uiuxGameState.options[optionIndex] === uiuxGameState.currentQuestion) {
+                    uiuxGameState.correct++;
+                    uiuxGameState.score += 10;
+                }
+                updateUIUXStats();
+                submitScoreLive(uiuxGameState.score);
+                generateUIUXQuestion();
+            }
+        }
+
+        function uiuxGameLoop() {
+            if (!uiuxGameState.running) return;
+            
+            const elapsed = Date.now() - uiuxGameState.startTime;
+            if (elapsed >= uiuxGameState.gameTime) {
+                endUIUXGame();
+                return;
+            }
+            
+            const ctx = uiuxGameState.ctx;
+            ctx.clearRect(0, 0, uiuxGameState.canvas.width, uiuxGameState.canvas.height);
+            
+            // Draw question
+            ctx.fillStyle = '#2d3748';
+            ctx.font = 'bold 24px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(`Find the: ${uiuxGameState.currentQuestion.name}`, uiuxGameState.canvas.width / 2, 50);
+            
+            // Draw options
+            const optionWidth = uiuxGameState.canvas.width / 4;
+            uiuxGameState.options.forEach((option, i) => {
+                const x = i * optionWidth + optionWidth / 2;
+                const y = uiuxGameState.canvas.height - 50;
+                
+                ctx.fillStyle = option.color;
+                if (option.shape === 'circle') {
+                    ctx.beginPath();
+                    ctx.arc(x, y, 30, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (option.shape === 'rect') {
+                    ctx.fillRect(x - 30, y - 30, 60, 60);
+                } else if (option.shape === 'roundRect') {
+                    ctx.beginPath();
+                    ctx.roundRect(x - 30, y - 30, 60, 60, 10);
+                    ctx.fill();
+                } else if (option.shape === 'line') {
+                    ctx.lineWidth = 5;
+                    ctx.strokeStyle = option.color;
+                    ctx.beginPath();
+                    ctx.moveTo(x - 30, y);
+                    ctx.lineTo(x + 30, y);
+                    ctx.stroke();
+                } else {
+                    ctx.fillRect(x - 25, y - 25, 50, 50);
+                }
+            });
+            
+            const timeLeft = Math.ceil((uiuxGameState.gameTime - elapsed) / 1000);
+            document.getElementById('timeLeft').textContent = timeLeft + 's';
+            
+            requestAnimationFrame(uiuxGameLoop);
+        }
+
+        function updateUIUXStats() {
+            document.getElementById('score').textContent = uiuxGameState.score;
+            document.getElementById('correct').textContent = uiuxGameState.correct;
+            const accuracy = uiuxGameState.total > 0 ? ((uiuxGameState.correct / uiuxGameState.total) * 100).toFixed(1) : 100;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+        }
+
+        async function endUIUXGame() {
+            uiuxGameState.running = false;
+            uiuxGameState.canvas.removeEventListener('click', handleUIUXClick);
+            
+            document.getElementById('finalScore').textContent = uiuxGameState.score;
+            document.getElementById('gameOver').classList.add('active');
+            
+            await submitScore(uiuxGameState.score);
+        }
+
+        function restartUIUXGame() {
+            startUIUXGame();
+        }
+
+        // ==================== HACKATHON SPRINT ====================
+        function loadHackathonSprint() {
+            currentGameId = 'hackathon';
+            currentGameName = 'Hackathon Sprint';
+            
+            document.getElementById('gameContainer').innerHTML = `
+                <div class="game-header">
+                    <button class="back-btn" onclick="backToMain()">← Back to Leaderboard</button>
+                    <div class="score-display">
+                        <div>Player: ${currentUser}</div>
+                        <div style="font-size: 0.8em; margin-top: 5px; color: #48bb78;">
+                            <i class="fas fa-sync-alt" style="animation: spin 2s linear infinite;"></i> Live Score Updates
+                        </div>
+                    </div>
+                </div>
+                <div class="instructions">
+                    💻 Code as fast as you can! Complete coding challenges before time runs out!
+                </div>
+                <div class="game-canvas-container" style="height: auto; min-height: 400px; padding: 30px;">
+                    <div style="background: #2d3748; color: #48bb78; padding: 20px; border-radius: 12px; font-family: 'Courier New', monospace; margin-bottom: 20px;">
+                        <div id="codeChallenge" style="font-size: 1.2em; line-height: 1.6;"></div>
+                    </div>
+                    <input type="text" id="codeInput" class="typing-input" placeholder="Type your code here..." disabled style="background: #2d3748; color: #48bb78;">
+                    <div class="game-over-overlay" id="gameOver">
+                        <div>Sprint Complete!</div>
+                        <div style="font-size: 0.6em; margin-top: 20px;">Final Score: <span id="finalScore">0</span></div>
+                        <div style="font-size: 0.4em; margin-top: 10px;">Score submitted to leaderboard!</div>
+                    </div>
+                </div>
+                <div class="stats-panel">
+                    <div class="stat-box">
+                        <div class="stat-label">Score</div>
+                        <div class="stat-value" id="score">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Completed</div>
+                        <div class="stat-value" id="completed">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Speed</div>
+                        <div class="stat-value" id="speed">0 CPM</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Time Left</div>
+                        <div class="stat-value" id="timeLeft">60s</div>
+                    </div>
+                </div>
+                <div class="game-controls">
+                    <button class="start-btn" id="startBtn" onclick="startHackathonGame()">Start Sprint</button>
+                    <button class="restart-btn" onclick="restartHackathonGame()" style="display:none;" id="restartBtn">Try Again</button>
+                </div>
+            `;
+            
+            initHackathonGame();
+        }
+
+        const codeChallenges = [
+            'function add(a, b) { return a + b; }',
+            'const arr = [1, 2, 3].map(x => x * 2);',
+            'if (x > 0) { console.log("positive"); }',
+            'for (let i = 0; i < 10; i++) { sum += i; }',
+            'const obj = { name: "John", age: 30 };'
+        ];
+
+        let hackathonGameState = {
+            running: false,
+            score: 0,
+            completed: 0,
+            currentChallenge: '',
+            startTime: 0,
+            gameTime: 60000,
+            intervalId: null,
+            totalChars: 0
+        };
+
+        function initHackathonGame() {
+            document.getElementById('codeInput').addEventListener('input', handleHackathonInput);
+        }
+
+        function startHackathonGame() {
+            hackathonGameState.running = true;
+            hackathonGameState.score = 0;
+            hackathonGameState.completed = 0;
+            hackathonGameState.totalChars = 0;
+            hackathonGameState.startTime = Date.now();
+            
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('restartBtn').style.display = 'inline-block';
+            document.getElementById('gameOver').classList.remove('active');
+            document.getElementById('codeInput').disabled = false;
+            document.getElementById('codeInput').value = '';
+            document.getElementById('codeInput').focus();
+            
+            generateCodeChallenge();
+            hackathonGameState.intervalId = setInterval(updateHackathonStats, 100);
+        }
+
+        function generateCodeChallenge() {
+            hackathonGameState.currentChallenge = codeChallenges[Math.floor(Math.random() * codeChallenges.length)];
+            document.getElementById('codeChallenge').textContent = hackathonGameState.currentChallenge;
+        }
+
+        function handleHackathonInput(e) {
+            if (!hackathonGameState.running) return;
+            
+            const input = e.target.value;
+            
+            if (input === hackathonGameState.currentChallenge) {
+                hackathonGameState.completed++;
+                hackathonGameState.score += 20;
+                hackathonGameState.totalChars += input.length;
+                e.target.value = '';
+                updateHackathonStats();
+                submitScoreLive(hackathonGameState.score);
+                generateCodeChallenge();
+            }
+        }
+
+        function updateHackathonStats() {
+            if (!hackathonGameState.running) return;
+            
+            const elapsed = Date.now() - hackathonGameState.startTime;
+            
+            if (elapsed >= hackathonGameState.gameTime) {
+                endHackathonGame();
+                return;
+            }
+            
+            document.getElementById('score').textContent = hackathonGameState.score;
+            document.getElementById('completed').textContent = hackathonGameState.completed;
+            
+            const cpm = Math.round((hackathonGameState.totalChars / (elapsed / 1000)) * 60);
+            document.getElementById('speed').textContent = cpm + ' CPM';
+            
+            const timeLeft = Math.ceil((hackathonGameState.gameTime - elapsed) / 1000);
+            document.getElementById('timeLeft').textContent = timeLeft + 's';
+        }
+
+        async function endHackathonGame() {
+            hackathonGameState.running = false;
+            clearInterval(hackathonGameState.intervalId);
+            
+            document.getElementById('codeInput').disabled = true;
+            document.getElementById('finalScore').textContent = hackathonGameState.score;
+            document.getElementById('gameOver').classList.add('active');
+            
+            await submitScore(hackathonGameState.score);
+        }
+
+        function restartHackathonGame() {
+            document.getElementById('gameOver').classList.remove('active');
+            startHackathonGame();
+        }
+
+        // ==================== CYBER DEFENSE ====================
+        function loadCyberDefense() {
+            currentGameId = 'cybersecurity';
+            currentGameName = 'Cyber Defense';
+            
+            document.getElementById('gameContainer').innerHTML = `
+                <div class="game-header">
+                    <button class="back-btn" onclick="backToMain()">← Back to Leaderboard</button>
+                    <div class="score-display">
+                        <div>Player: ${currentUser}</div>
+                        <div style="font-size: 0.8em; margin-top: 5px; color: #48bb78;">
+                            <i class="fas fa-sync-alt" style="animation: spin 2s linear infinite;"></i> Live Score Updates
+                        </div>
+                    </div>
+                </div>
+                <div class="instructions">
+                    🛡️ Defend against cyber threats! Click on malicious packets (red) and avoid safe ones (green)!
+                </div>
+                <div class="game-canvas-container">
+                    <canvas id="gameCanvas"></canvas>
+                    <div class="game-over-overlay" id="gameOver">
+                        <div>Defense Complete!</div>
+                        <div style="font-size: 0.6em; margin-top: 20px;">Final Score: <span id="finalScore">0</span></div>
+                        <div style="font-size: 0.4em; margin-top: 10px;">Score submitted to leaderboard!</div>
+                    </div>
+                </div>
+                <div class="stats-panel">
+                    <div class="stat-box">
+                        <div class="stat-label">Score</div>
+                        <div class="stat-value" id="score">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Threats Blocked</div>
+                        <div class="stat-value" id="blocked">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Accuracy</div>
+                        <div class="stat-value" id="accuracy">100%</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Time Left</div>
+                        <div class="stat-value" id="timeLeft">40s</div>
+                    </div>
+                </div>
+                <div class="game-controls">
+                    <button class="start-btn" id="startBtn" onclick="startCyberGame()">Start Defense</button>
+                    <button class="restart-btn" onclick="restartCyberGame()" style="display:none;" id="restartBtn">Try Again</button>
+                </div>
+            `;
+            
+            initCyberGame();
+        }
+
+        let cyberGameState = {
+            canvas: null,
+            ctx: null,
+            running: false,
+            score: 0,
+            blocked: 0,
+            correct: 0,
+            total: 0,
+            packets: [],
+            lastPacketTime: 0,
+            gameTime: 40000,
+            startTime: 0
+        };
+
+        function initCyberGame() {
+            setTimeout(() => {
+                cyberGameState.canvas = document.getElementById('gameCanvas');
+                if (!cyberGameState.canvas) return;
+                cyberGameState.ctx = cyberGameState.canvas.getContext('2d');
+                resizeCanvas();
+            }, 200);
+        }
+
+        function startCyberGame() {
+            if (!cyberGameState.canvas || !cyberGameState.ctx) {
+                alert('Game is still loading, please wait and try again.');
+                return;
+            }
+            
+            cyberGameState.running = true;
+            cyberGameState.score = 0;
+            cyberGameState.blocked = 0;
+            cyberGameState.correct = 0;
+            cyberGameState.total = 0;
+            cyberGameState.packets = [];
+            cyberGameState.startTime = Date.now();
+            cyberGameState.lastPacketTime = 0;
+            
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('restartBtn').style.display = 'inline-block';
+            document.getElementById('gameOver').classList.remove('active');
+            
+            cyberGameState.canvas.addEventListener('click', handleCyberClick);
+            cyberGameLoop();
+        }
+
+        function handleCyberClick(e) {
+            if (!cyberGameState.running) return;
+            
+            const rect = cyberGameState.canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            cyberGameState.total++;
+            
+            for (let i = cyberGameState.packets.length - 1; i >= 0; i--) {
+                const packet = cyberGameState.packets[i];
+                const dx = x - packet.x;
+                const dy = y - packet.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < 25) {
+                    if (packet.isMalicious) {
+                        cyberGameState.blocked++;
+                        cyberGameState.correct++;
+                        cyberGameState.score += 15;
+                    } else {
+                        cyberGameState.score -= 5;
+                    }
+                    cyberGameState.packets.splice(i, 1);
+                    updateCyberStats();
+                    submitScoreLive(cyberGameState.score);
+                    break;
+                }
+            }
+        }
+
+        function cyberGameLoop() {
+            if (!cyberGameState.running) return;
+            
+            const elapsed = Date.now() - cyberGameState.startTime;
+            if (elapsed >= cyberGameState.gameTime) {
+                endCyberGame();
+                return;
+            }
+            
+            cyberGameState.ctx.clearRect(0, 0, cyberGameState.canvas.width, cyberGameState.canvas.height);
+            
+            // Spawn packets
+            if (Date.now() - cyberGameState.lastPacketTime > 800) {
+                spawnPacket();
+                cyberGameState.lastPacketTime = Date.now();
+            }
+            
+            // Update and draw packets
+            for (let i = cyberGameState.packets.length - 1; i >= 0; i--) {
+                const packet = cyberGameState.packets[i];
+                
+                packet.y += packet.speed;
+                
+                if (packet.y > cyberGameState.canvas.height) {
+                    cyberGameState.packets.splice(i, 1);
+                    continue;
+                }
+                
+                // Draw packet
+                cyberGameState.ctx.fillStyle = packet.isMalicious ? '#f56565' : '#48bb78';
+                cyberGameState.ctx.beginPath();
+                cyberGameState.ctx.arc(packet.x, packet.y, 25, 0, Math.PI * 2);
+                cyberGameState.ctx.fill();
+                
+                // Draw icon
+                cyberGameState.ctx.fillStyle = 'white';
+                cyberGameState.ctx.font = 'bold 20px Arial';
+                cyberGameState.ctx.textAlign = 'center';
+                cyberGameState.ctx.textBaseline = 'middle';
+                cyberGameState.ctx.fillText(packet.isMalicious ? '⚠' : '✓', packet.x, packet.y);
+            }
+            
+            const timeLeft = Math.ceil((cyberGameState.gameTime - elapsed) / 1000);
+            document.getElementById('timeLeft').textContent = timeLeft + 's';
+            
+            requestAnimationFrame(cyberGameLoop);
+        }
+
+        function spawnPacket() {
+            const packet = {
+                x: Math.random() * (cyberGameState.canvas.width - 50) + 25,
+                y: -25,
+                speed: 2 + Math.random() * 2,
+                isMalicious: Math.random() > 0.4
+            };
+            cyberGameState.packets.push(packet);
+        }
+
+        function updateCyberStats() {
+            document.getElementById('score').textContent = cyberGameState.score;
+            document.getElementById('blocked').textContent = cyberGameState.blocked;
+            const accuracy = cyberGameState.total > 0 ? ((cyberGameState.correct / cyberGameState.total) * 100).toFixed(1) : 100;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+        }
+
+        async function endCyberGame() {
+            cyberGameState.running = false;
+            cyberGameState.canvas.removeEventListener('click', handleCyberClick);
+            
+            document.getElementById('finalScore').textContent = cyberGameState.score;
+            document.getElementById('gameOver').classList.add('active');
+            
+            await submitScore(cyberGameState.score);
+        }
+
+        function restartCyberGame() {
+            startCyberGame();
+        }
+    </script>
+</body>
+</html>
